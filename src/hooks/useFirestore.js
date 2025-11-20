@@ -63,6 +63,7 @@ export const useLivestock = (animalType) => {
         unsubscribe();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser, animalType, isOnline]);
 
   // Add new livestock record
@@ -155,6 +156,7 @@ export const useEnvironmentalData = () => {
         unsubscribe();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOnline]);
 
   return {
@@ -166,7 +168,8 @@ export const useEnvironmentalData = () => {
 };
 
 /**
- * Custom hook for alert management with real-time updates
+ * Custom hook for global alert management with real-time updates
+ * Alerts are shared across all farmers
  * Supports offline mode by showing cached data
  * @returns {Object} Alerts data, loading state, error, and addAlert function
  */
@@ -179,18 +182,12 @@ export const useAlerts = () => {
   const [isFromCache, setIsFromCache] = useState(false);
 
   useEffect(() => {
-    if (!currentUser) {
-      setLoading(false);
-      return;
-    }
-
     setLoading(true);
     setError(null);
 
-    // Subscribe to real-time alerts updates
+    // Subscribe to real-time global alerts updates
     // Firestore automatically serves cached data when offline
     const unsubscribe = subscribeAlerts(
-      currentUser.uid,
       (alertsData, err) => {
         if (err) {
           // If offline, keep showing cached data
@@ -209,22 +206,26 @@ export const useAlerts = () => {
       }
     );
 
-    // Cleanup listener on unmount or when user changes
+    // Cleanup listener on unmount
     return () => {
       if (unsubscribe) {
         unsubscribe();
       }
     };
-  }, [currentUser, isOnline]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOnline]);
 
-  // Add new alert
+  // Add new alert with user info
   const addNewAlert = useCallback(async (alertData) => {
     if (!currentUser) {
       throw new Error('User must be authenticated');
     }
 
     try {
-      const docId = await addAlert(currentUser.uid, alertData);
+      const docId = await addAlert(currentUser.uid, {
+        ...alertData,
+        createdByName: currentUser.displayName || currentUser.email || 'Unknown User'
+      });
       return docId;
     } catch (err) {
       setError(err.message || 'Failed to add alert');

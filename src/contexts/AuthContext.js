@@ -6,7 +6,8 @@ import {
   onAuthStateChanged 
 } from '../firebase/authService';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase/config';
+import { db } from '../firebase';
+import { requestNotificationPermission, setupForegroundMessageListener } from '../services/notificationService';
 
 // Create the Authentication Context
 const AuthContext = createContext({});
@@ -60,9 +61,10 @@ export const AuthProvider = ({ children }) => {
    * @param {string} password - User's password
    * @param {string} fullName - User's full name
    * @param {string} role - User's role
+   * @param {Object} additionalData - Additional user data (e.g., department, region for government)
    */
-  const signUp = async (email, password, fullName, role) => {
-    const user = await authSignUp(email, password, fullName, role);
+  const signUp = async (email, password, fullName, role, additionalData = {}) => {
+    const user = await authSignUp(email, password, fullName, role, additionalData);
     // Profile is created in authService, fetch it
     await fetchUserProfile(user.uid);
     return user;
@@ -98,6 +100,14 @@ export const AuthProvider = ({ children }) => {
       if (user) {
         // User is signed in, fetch their profile
         await fetchUserProfile(user.uid);
+        
+        // Request notification permission for logged-in users
+        // Wait a bit to avoid overwhelming the user immediately after login
+        setTimeout(() => {
+          requestNotificationPermission(user.uid).catch(err => {
+            console.error("Failed to request notification permission:", err);
+          });
+        }, 2000);
       } else {
         // User is signed out, clear profile
         setUserProfile(null);
@@ -109,6 +119,18 @@ export const AuthProvider = ({ children }) => {
     // Cleanup subscription on unmount
     return unsubscribe;
   }, []);
+
+  // Set up foreground message listener
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const unsubscribe = setupForegroundMessageListener((payload) => {
+      console.log("Received foreground notification:", payload);
+      // You can add custom handling here, like showing a toast
+    });
+
+    return unsubscribe;
+  }, [currentUser]);
 
   const value = {
     currentUser,

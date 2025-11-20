@@ -12,9 +12,16 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
     
+    // Helper function to check if user is government official
+    function isGovernment() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'government';
+    }
+    
     // Users collection
     match /users/{userId} {
-      allow read: if isOwner(userId);
+      allow read: if isOwner(userId) || isGovernment();
       allow create: if isAuthenticated() && request.auth.uid == userId;
       allow update: if isOwner(userId);
       allow delete: if false; // Prevent deletion
@@ -22,7 +29,7 @@ service cloud.firestore {
     
     // Livestock collection
     match /livestock/{docId} {
-      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow read: if (isAuthenticated() && resource.data.userId == request.auth.uid) || isGovernment();
       allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
       allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
       allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
@@ -34,12 +41,67 @@ service cloud.firestore {
       allow write: if isAuthenticated(); // In production, restrict to admin/sensor role
     }
     
-    // Alerts collection
+    // Alerts collection (global alerts visible to all farmers)
     match /alerts/{docId} {
-      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
-      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      // All authenticated users can read all alerts (we filter by isGlobal in the query)
+      allow read: if isAuthenticated();
+      // Any authenticated user can create global alerts
+      allow create: if isAuthenticated() && request.resource.data.isGlobal == true;
+      // Creator or government can update alerts
+      allow update: if isAuthenticated() && (resource.data.createdBy == request.auth.uid || isGovernment());
+      // Creator or government can delete alerts
+      allow delete: if isAuthenticated() && (resource.data.createdBy == request.auth.uid || isGovernment());
+    }
+    
+    // Shared Animals collection
+    // Farmers can read/write their own animals
+    // Veterinarians can read all animals
+    match /animals/{animalId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+      allow update: if isAuthenticated() && 
+        (resource.data.ownerId == request.auth.uid || 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'veterinarian');
+      allow delete: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
+    }
+    
+    // Vet Reports collection
+    // Veterinarians can create reports
+    // Farmers can read their own reports
+    // Government can read all reports for monitoring
+    match /vetReports/{reportId} {
+      allow read: if isAuthenticated() && 
+        (resource.data.farmerId == request.auth.uid || 
+         resource.data.vetId == request.auth.uid ||
+         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+          (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'veterinarian' ||
+           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'government')));
+      // Allow create if authenticated and vetId matches current user
+      allow create: if isAuthenticated() && 
+        request.resource.data.vetId == request.auth.uid;
+      allow update: if isAuthenticated() && resource.data.vetId == request.auth.uid;
+      allow delete: if false; // Prevent deletion of medical records
+    }
+    
+    // Vet Requests collection (farmer condition reports)
+    // Farmers can create and read their own requests
+    // Veterinarians can read all requests and update status
+    // Government can read all requests
+    match /vetRequests/{requestId} {
+      // Allow create if authenticated and farmerId matches current user
+      allow create: if isAuthenticated() && 
+        request.resource.data.farmerId == request.auth.uid;
+      // Allow read if user is the farmer, veterinarian, or government
+      allow read: if isAuthenticated() && 
+        (resource.data.farmerId == request.auth.uid || 
+         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+          (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'veterinarian' ||
+           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'government')));
+      // Allow update only for veterinarians (check if user doc exists first)
+      allow update: if isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'veterinarian';
+      allow delete: if false; // Prevent deletion of condition reports
     }
   }
 }

@@ -56,7 +56,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     // Redirect to appropriate dashboard based on user's actual role
     const dashboardRoutes = {
       farmer: '/dashboard',
-      veterinarian: '/vet-dashboard',
+      veterinarian: '/vet/dashboard',
       government: '/gov-dashboard'
     };
     

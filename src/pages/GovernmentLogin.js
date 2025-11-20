@@ -1,37 +1,25 @@
 import { useState } from "react";
-import { Mail, Lock, User } from "lucide-react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Mail, Lock, Building2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../components/ToastContainer";
 import { getAuthErrorMessage } from "../utils/errorHandlers";
-import { useTranslation } from "react-i18next";
-import LanguageSwitcher from "../components/LanguageSwitcher";
 
-export default function Login() {
+export default function GovernmentLogin() {
   const navigate = useNavigate();
-  const { search } = useLocation();
-  const params = new URLSearchParams(search);
-  const role = params.get("role") || "farmer";
-  
   const { signIn } = useAuth();
   const { showError, showSuccess } = useToast();
-  const { t } = useTranslation();
   
-  // Form state management for email and password
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  
-  // UI state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleLogin = async (e) => {
     e.preventDefault();
     
-    // Clear previous errors
     setError("");
     
-    // Basic validation
     if (!email.trim() || !password) {
       setError("Please enter both email and password");
       return;
@@ -40,16 +28,10 @@ export default function Login() {
     setLoading(true);
     
     try {
-      // Call signIn function from AuthContext on form submission
       await signIn(email, password);
-      
-      // Show success message
       showSuccess("Login successful!");
-      
-      // Redirect to role-specific dashboard on successful login
-      navigate(`/dashboard?role=${role}`);
+      navigate("/government-dashboard");
     } catch (err) {
-      // Display error messages for invalid credentials
       const errorMessage = getAuthErrorMessage(err);
       setError(errorMessage);
       showError(errorMessage);
@@ -59,21 +41,16 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-green-100 flex items-center justify-center p-4">
-      {/* Language Switcher */}
-      <div className="absolute top-6 right-6">
-        <LanguageSwitcher />
-      </div>
-
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12 max-w-md w-full">
         <div className="text-center mb-8">
-          <div className="bg-green-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-            <User className="w-8 h-8 text-white" />
+          <div className="bg-blue-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Building2 className="w-8 h-8 text-white" />
           </div>
           <h2 className="text-3xl font-bold text-gray-800 mb-2">
-            {t("signInAsRole", { role: t(role) })}
+            Government Services
           </h2>
-          <p className="text-gray-600">{t("alreadyHaveAccount")}</p>
+          <p className="text-gray-600">Agriculture Official Login</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
@@ -85,7 +62,7 @@ export default function Login() {
 
           <div>
             <label className="block text-gray-700 font-semibold mb-2">
-              {t("email")}
+              Official Email Address
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
@@ -93,8 +70,8 @@ export default function Login() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="your@email.com"
+                className="w-full pl-12 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="official@agriculture.gov"
                 disabled={loading}
               />
             </div>
@@ -102,7 +79,7 @@ export default function Login() {
 
           <div>
             <label className="block text-gray-700 font-semibold mb-2">
-              {t("password")}
+              Password
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
@@ -110,7 +87,7 @@ export default function Login() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full pl-12 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="••••••••"
                 disabled={loading}
               />
@@ -120,20 +97,20 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            {loading ? t("loading") : t("login")}
+            {loading ? "Logging in..." : "Login to Dashboard"}
           </button>
         </form>
 
         <p className="text-center text-sm text-gray-600 mt-6">
-          {t("dontHaveAccount")}{" "}
+          Need an official account?{" "}
           <button
-            onClick={() => navigate(`/signup?role=${role}`)}
-            className="text-green-600 hover:text-green-700 font-semibold"
+            onClick={() => navigate("/government-signup")}
+            className="text-blue-600 hover:text-blue-700 font-semibold"
             disabled={loading}
           >
-            {t("signup")}
+            Register Here
           </button>
         </p>
 
@@ -142,7 +119,7 @@ export default function Login() {
           className="text-sm text-gray-600 hover:text-gray-800 underline block mx-auto mt-4"
           disabled={loading}
         >
-          ← {t("backToWelcome")}
+          ← Back to Role Selection
         </button>
       </div>
     </div>

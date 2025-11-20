@@ -4,7 +4,7 @@ import {
   signOut as firebaseSignOut,
   onAuthStateChanged as firebaseOnAuthStateChanged
 } from 'firebase/auth';
-import { auth, db } from './config';
+import { auth, db } from '../firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
@@ -15,30 +15,35 @@ import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
  * @param {string} password - User's password
  * @param {string} fullName - User's full name
  * @param {string} role - User's role (farmer, veterinarian, government)
+ * @param {Object} additionalData - Additional user data (e.g., department, region)
  * @returns {Promise<Object>} User object with profile data
  */
-export const signUp = async (email, password, fullName, role = 'farmer') => {
+export const signUp = async (email, password, fullName, role = 'farmer', additionalData = {}) => {
   try {
     // Create Firebase Auth user
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
     // Create user profile document in Firestore
-    await setDoc(doc(db, 'users', user.uid), {
+    const userProfile = {
       userId: user.uid,
       email: email,
       fullName: fullName,
       role: role,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
-      profileComplete: true
-    });
+      profileComplete: true,
+      ...additionalData // Spread additional data (department, region, etc.)
+    };
+
+    await setDoc(doc(db, 'users', user.uid), userProfile);
 
     return {
       uid: user.uid,
       email: user.email,
       fullName: fullName,
-      role: role
+      role: role,
+      ...additionalData
     };
   } catch (error) {
     console.error('Error signing up:', error);

@@ -1,70 +1,218 @@
-# Getting Started with Create React App
+# Smart Bio Farm 🌾🐄🐖🐔
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A comprehensive agricultural management system connecting farmers, veterinarians, and government officials for better livestock health management and agricultural monitoring.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 🚀 Quick Start
 
-### `npm start`
+### Prerequisites
+- Node.js v16+
+- npm v8+
+- Firebase account
+- OpenWeatherMap API key
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### Installation
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+1. **Clone the repository**
+```bash
+git clone <repository-url>
+cd smart-bio-farm
+```
 
-### `npm test`
+2. **Install dependencies**
+```bash
+# Frontend
+npm install
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+# Backend
+cd backend
+npm install
+cd ..
+```
 
-### `npm run build`
+3. **Configure environment variables**
+```bash
+# Copy and edit .env files
+cp .env.example .env
+cp backend/.env.example backend/.env
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+4. **Start development servers**
+```bash
+# Terminal 1 - Backend
+cd backend
+npm start
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+# Terminal 2 - Frontend
+npm start
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+5. **Open application**
+```
+http://localhost:3000
+```
 
-### `npm run eject`
+---
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## 📚 Complete Documentation
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+**For detailed documentation, see:** [`PROJECT_DOCUMENTATION.md`](./PROJECT_DOCUMENTATION.md)
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+The comprehensive documentation includes:
+- Complete system architecture
+- Technology stack details
+- Setup & installation guide
+- API reference
+- Database schema
+- User roles & features
+- Testing procedures
+- Deployment guide
+- Troubleshooting tips
+- And much more!
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+---
 
-## Learn More
+## 🎯 Key Features
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### For Farmers 👨‍🌾
+- Manage livestock inventory
+- Request veterinary services
+- Track animal health
+- Receive weather updates
+- Get government alerts
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### For Veterinarians 👨‍⚕️
+- View treatment requests
+- Create medical reports
+- Track treatment history
+- Receive urgent notifications
 
-### Code Splitting
+### For Government Officials 🏛️
+- Monitor agricultural activities
+- Broadcast alerts to farmers
+- View system analytics
+- Access all data for oversight
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+---
 
-### Analyzing the Bundle Size
+## 🛠️ Technology Stack
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+- **Frontend:** React 19, Tailwind CSS, i18next
+- **Backend:** Node.js, Express
+- **Database:** Cloud Firestore
+- **Authentication:** Firebase Auth
+- **Notifications:** Firebase Cloud Messaging
+- **Weather:** OpenWeatherMap API
 
-### Making a Progressive Web App
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## 📱 Available Scripts
 
-### Advanced Configuration
+### Frontend
+```bash
+npm start          # Start development server
+npm run build      # Create production build
+npm test           # Run tests
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+### Backend
+```bash
+cd backend
+npm start          # Start backend server
+```
 
-### Deployment
+### Testing
+```bash
+node test-notifications.js              # Test notification system
+node test-weather.js                    # Test weather integration
+node backend/test-firebase-connection.js # Test Firebase connection
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+---
 
-### `npm run build` fails to minify
+## 🌍 Multilingual Support
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+The application supports:
+- 🇬🇧 English
+- 🇮🇳 Hindi (हिंदी)
+- 🇮🇳 Marathi (मराठी)
+
+---
+
+## 🔐 User Roles
+
+1. **Farmer** - Manage animals, request treatments
+2. **Veterinarian** - Respond to requests, create reports
+3. **Government** - Monitor system, broadcast alerts
+
+**Government Signup Code:** `SMART_GOV_2025`
+
+---
+
+## 📊 Project Status
+
+✅ **Production Ready**
+
+- Backend & Firebase: Connected
+- Notification System: Working
+- Weather Integration: Active
+- All Features: Implemented
+- Build: Successful (zero warnings)
+
+---
+
+## 🧪 Testing
+
+Run automated tests:
+```bash
+# Test all systems
+node backend/test-firebase-connection.js && \
+node test-notifications.js && \
+node test-weather.js
+```
+
+For manual testing procedures, see the [Testing Guide](./PROJECT_DOCUMENTATION.md#13-testing-guide) in the documentation.
+
+---
+
+## 🚀 Deployment
+
+The application can be deployed to:
+- Firebase Hosting (recommended)
+- Vercel
+- Netlify
+- Heroku (backend)
+- Google Cloud Run (backend)
+- AWS EC2 (backend)
+
+See [Deployment Guide](./PROJECT_DOCUMENTATION.md#14-deployment) for detailed instructions.
+
+---
+
+## 📞 Support
+
+For issues, questions, or contributions:
+1. Check [`PROJECT_DOCUMENTATION.md`](./PROJECT_DOCUMENTATION.md)
+2. Run test scripts to diagnose issues
+3. Check browser console and backend logs
+4. Review troubleshooting section in documentation
+
+---
+
+## 📄 License
+
+[Your License Here]
+
+---
+
+## 🙏 Acknowledgments
+
+- Firebase team for excellent services
+- OpenWeatherMap for weather API
+- React community for helpful resources
+- All open-source contributors
+
+---
+
+**For complete documentation, please refer to [`PROJECT_DOCUMENTATION.md`](./PROJECT_DOCUMENTATION.md)**

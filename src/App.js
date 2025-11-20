@@ -9,6 +9,15 @@ import Profession from "./pages/Profession";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import FarmerDashboard from "./pages/FarmerDashboard";
+import VetLogin from "./pages/VetLogin";
+import VetSignup from "./pages/VetSignup";
+import VetDashboard from "./pages/VetDashboard";
+import VetRequests from "./pages/VetRequests";
+import FarmerMyRequests from "./pages/FarmerMyRequests";
+import VetTreatmentHistory from "./pages/VetTreatmentHistory";
+import GovernmentLogin from "./pages/GovernmentLogin";
+import GovernmentSignup from "./pages/GovernmentSignup";
+import GovernmentDashboard from "./pages/GovernmentDashboard";
 
 export default function App() {
   return (
@@ -27,6 +36,50 @@ export default function App() {
                 element={
                   <ProtectedRoute requiredRole="farmer">
                     <FarmerDashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route path="/vet/login" element={<VetLogin />} />
+              <Route path="/vet/signup" element={<VetSignup />} />
+              <Route 
+                path="/vet/dashboard" 
+                element={
+                  <ProtectedRoute requiredRole="veterinarian">
+                    <VetDashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/vet-requests" 
+                element={
+                  <ProtectedRoute requiredRole="veterinarian">
+                    <VetRequests />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/farmer/requests" 
+                element={
+                  <ProtectedRoute requiredRole="farmer">
+                    <FarmerMyRequests />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/vet/history" 
+                element={
+                  <ProtectedRoute requiredRole="veterinarian">
+                    <VetTreatmentHistory />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route path="/government-login" element={<GovernmentLogin />} />
+              <Route path="/government-signup" element={<GovernmentSignup />} />
+              <Route 
+                path="/government-dashboard" 
+                element={
+                  <ProtectedRoute requiredRole="government">
+                    <GovernmentDashboard />
                   </ProtectedRoute>
                 } 
               />

@@ -12,72 +12,199 @@ import {
   X,
   AlertTriangle
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import AnimalChart from "../components/AnimalChart";
 import { useAuth } from "../contexts/AuthContext";
-import { useLivestock, useEnvironmentalData, useAlerts } from "../hooks/useFirestore";
+import { useAlerts } from "../hooks/useFirestore";
 import { useToast } from "../components/ToastContainer";
 import { getFirestoreErrorMessage } from "../utils/errorHandlers";
+import { getWeather, getUserLocation } from "../utils/weatherService";
+import { db, auth } from "../firebase";
+import { collection, addDoc, deleteDoc, doc, serverTimestamp, query, where, getDocs, onSnapshot } from "firebase/firestore";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 
 export default function FarmerDashboard() {
   const navigate = useNavigate();
   const { search } = useLocation();
   const params = new URLSearchParams(search);
   const role = params.get("role") || "farmer";
-  const { signOut } = useAuth();
+  const { signOut, currentUser } = useAuth();
   const { showError, showSuccess, showWarning } = useToast();
+  const { t } = useTranslation();
 
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [profileComplete, setProfileComplete] = useState(false);
   const [logoutError, setLogoutError] = useState(null);
 
-  // Firestore hooks for livestock data
-  const pigsHook = useLivestock('pigs');
-  const chickensHook = useLivestock('chickens');
+  // Loading state for animals data
+  const [animalsLoading, setAnimalsLoading] = useState(true);
 
-  // Firestore hook for real-time environmental data
-  const { data: environmentalData, loading: envLoading, error: envError } = useEnvironmentalData();
+
 
   // Firestore hook for alerts with real-time updates
   const { alerts: firestoreAlerts, loading: alertsLoading, error: alertsError, addAlert: addFirestoreAlert } = useAlerts();
 
-  // Use real-time data from Firestore or fallback to defaults
-  const liveData = {
-    temperature: environmentalData?.temperature ?? 28,
-    humidity: environmentalData?.humidity ?? 65,
-    timestamp: environmentalData?.timestamp
-  };
+  // Real weather data state
+  const [weather, setWeather] = useState(null);
+  const [weatherLoading, setWeatherLoading] = useState(true);
 
-  const [animalStats] = useState({
-    totalAnimals: 245,
-    activeCategories: 2,
-    todayUpdates: 5,
-    totalValue: 185000
+  // Calculate real animal statistics from database
+  const [animalStats, setAnimalStats] = useState({
+    totalAnimals: 0,
+    activeCategories: 0,
+    todayUpdates: 0,
+    totalValue: 0
   });
 
-  const [animalQuantityData] = useState([
-    { name: 'Mon', pigs: 40, chickens: 240 },
-    { name: 'Tue', pigs: 30, chickens: 220 },
-    { name: 'Wed', pigs: 20, chickens: 290 },
-    { name: 'Thu', pigs: 27, chickens: 200 },
-    { name: 'Fri', pigs: 18, chickens: 280 },
-    { name: 'Sat', pigs: 23, chickens: 250 },
-    { name: 'Sun', pigs: 34, chickens: 210 },
-  ]);
+  // Fetch all animals and calculate stats
+  useEffect(() => {
+    if (!currentUser) {
+      setAnimalsLoading(false);
+      return;
+    }
 
-  const [priceTrendData] = useState([
-    { name: 'Jan', price: 4000 },
-    { name: 'Feb', price: 3000 },
-    { name: 'Mar', price: 2000 },
-    { name: 'Apr', price: 2780 },
-    { name: 'May', price: 1890 },
-    { name: 'Jun', price: 2390 },
-    { name: 'Jul', price: 3490 },
-  ]);
+    setAnimalsLoading(true);
+
+    const q = query(
+      collection(db, "animals"),
+      where("ownerId", "==", currentUser.uid)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const animals = [];
+      let totalAnimals = 0;
+      let totalValue = 0;
+      const categories = new Set();
+      let todayCount = 0;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        animals.push({ id: doc.id, ...data });
+        
+        totalAnimals += data.quantity || 0;
+        totalValue += (data.quantity || 0) * (data.price || 0);
+        categories.add(data.type);
+        
+        // Check if created today
+        if (data.createdAt && data.createdAt.toDate) {
+          const createdDate = data.createdAt.toDate();
+          createdDate.setHours(0, 0, 0, 0);
+          if (createdDate.getTime() === today.getTime()) {
+            todayCount++;
+          }
+        }
+      });
+
+      setAllAnimalsData(animals);
+      setAnimalStats({
+        totalAnimals,
+        activeCategories: categories.size,
+        todayUpdates: todayCount,
+        totalValue
+      });
+      setAnimalsLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [currentUser]);
+
+  // State for all animals data (needed for charts)
+  const [allAnimalsData, setAllAnimalsData] = useState([]);
+  
+  // Real chart data from database
+  const [animalQuantityData, setAnimalQuantityData] = useState([]);
+  const [priceTrendData, setPriceTrendData] = useState([]);
+
+  // Calculate chart data from real animals
+  useEffect(() => {
+    if (allAnimalsData.length === 0) {
+      // Show empty state or default data
+      setAnimalQuantityData([
+        { name: 'No Data', pigs: 0, chickens: 0 }
+      ]);
+      setPriceTrendData([
+        { name: 'No Data', price: 0 }
+      ]);
+      return;
+    }
+
+    // Group animals by date for last 7 days
+    const last7Days = [];
+    const today = new Date();
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      last7Days.push({
+        date: date,
+        name: date.toLocaleDateString('en-US', { weekday: 'short' }),
+        pigs: 0,
+        chickens: 0
+      });
+    }
+
+    // Count animals by type for each day
+    allAnimalsData.forEach(animal => {
+      if (animal.createdAt && animal.createdAt.toDate) {
+        const animalDate = animal.createdAt.toDate();
+        const dayIndex = last7Days.findIndex(day => 
+          day.date.toDateString() === animalDate.toDateString()
+        );
+        
+        if (dayIndex !== -1) {
+          if (animal.type === 'pigs') {
+            last7Days[dayIndex].pigs += animal.quantity || 0;
+          } else if (animal.type === 'chickens') {
+            last7Days[dayIndex].chickens += animal.quantity || 0;
+          }
+        }
+      }
+    });
+
+    setAnimalQuantityData(last7Days.map(({ name, pigs, chickens }) => ({ name, pigs, chickens })));
+
+    // Calculate price trends by month (last 6 months)
+    const last6Months = [];
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date(today);
+      date.setMonth(date.getMonth() - i);
+      last6Months.push({
+        date: date,
+        name: date.toLocaleDateString('en-US', { month: 'short' }),
+        price: 0,
+        count: 0
+      });
+    }
+
+    // Calculate average price per month
+    allAnimalsData.forEach(animal => {
+      if (animal.createdAt && animal.createdAt.toDate) {
+        const animalDate = animal.createdAt.toDate();
+        const monthIndex = last6Months.findIndex(month => 
+          month.date.getMonth() === animalDate.getMonth() &&
+          month.date.getFullYear() === animalDate.getFullYear()
+        );
+        
+        if (monthIndex !== -1) {
+          last6Months[monthIndex].price += animal.price || 0;
+          last6Months[monthIndex].count += 1;
+        }
+      }
+    });
+
+    // Calculate average prices
+    const priceData = last6Months.map(month => ({
+      name: month.name,
+      price: month.count > 0 ? Math.round(month.price / month.count) : 0
+    }));
+
+    setPriceTrendData(priceData);
+  }, [allAnimalsData]);
 
   // Alerts State
   const [showAddReportModal, setShowAddReportModal] = useState(false);
@@ -86,7 +213,6 @@ export default function FarmerDashboard() {
   const [showAnimalModal, setShowAnimalModal] = useState(false);
   const [selectedAnimal, setSelectedAnimal] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [editingRow, setEditingRow] = useState(null);
   const [operationError, setOperationError] = useState(null);
 
   const [newEntry, setNewEntry] = useState({
@@ -99,6 +225,72 @@ export default function FarmerDashboard() {
 
   const [newReport, setNewReport] = useState({ type: "info", message: "" });
 
+  // State for animals from shared database
+  const [pigData, setPigData] = useState([]);
+  const [chickenData, setChickenData] = useState([]);
+  
+
+  
+  // State for Report Condition modal
+  const [showConditionModal, setShowConditionModal] = useState(false);
+  const [reportAnimalType, setReportAnimalType] = useState("");
+  const [reportCategory, setReportCategory] = useState("");
+  const [reportMessage, setReportMessage] = useState("");
+
+  // Fetch real weather data
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        setWeatherLoading(true);
+        // Get user's location or use default (Mumbai, India)
+        const location = await getUserLocation();
+        
+        // OpenWeatherMap API key
+        const apiKey = "8f4980c2b086f0f5a64ebc8ba62d8326";
+        
+        const data = await getWeather(location.lat, location.lon, apiKey);
+        setWeather(data);
+        setWeatherLoading(false);
+      } catch (error) {
+        console.error("Failed to fetch weather:", error);
+        setWeatherLoading(false);
+      }
+    };
+
+    fetchWeather();
+    
+    // Update weather every 5 minutes
+    const interval = setInterval(fetchWeather, 5 * 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fetch animals from shared database
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const fetchAnimals = async () => {
+      try {
+        const q = query(
+          collection(db, "animals"),
+          where("ownerId", "==", currentUser.uid),
+          where("type", "==", selectedAnimal)
+        );
+
+        const snap = await getDocs(q);
+        const arr = [];
+        snap.forEach((doc) => arr.push({ id: doc.id, ...doc.data() }));
+
+        if (selectedAnimal === "pigs") setPigData(arr);
+        else if (selectedAnimal === "chickens") setChickenData(arr);
+      } catch (error) {
+        console.error("Error fetching animals:", error);
+      }
+    };
+
+    if (selectedAnimal) fetchAnimals();
+  }, [selectedAnimal, showAddForm, currentUser]);
+
   const handleAddReport = async () => {
     if (!newReport.message.trim()) {
       showWarning("Please enter an alert message");
@@ -107,12 +299,35 @@ export default function FarmerDashboard() {
 
     try {
       setAddAlertError(null);
+      
+      // Add alert to Firestore
       await addFirestoreAlert({
         type: newReport.type,
         message: newReport.message
       });
       
-      showSuccess("Alert added successfully");
+      // Send push notifications to all farmers via backend
+      try {
+        const response = await fetch('http://localhost:5000/notify-farmers-new-alert', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            alertType: newReport.type,
+            alertMessage: newReport.message,
+            createdByName: currentUser?.displayName || currentUser?.email || 'A Farmer'
+          })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`Alert notification sent to ${data.successCount} farmers`);
+        }
+      } catch (notifError) {
+        // Don't fail the whole operation if notification fails
+        console.error("Error sending alert notifications:", notifError);
+      }
+      
+      showSuccess("Alert added successfully and farmers notified!");
       setNewReport({ type: "info", message: "" });
       setShowAddReportModal(false);
     } catch (error) {
@@ -123,11 +338,56 @@ export default function FarmerDashboard() {
     }
   };
 
-  // Get current data and hook based on selected animal
-  const currentHook = selectedAnimal === "pigs" ? pigsHook : chickensHook;
-  const currentData = currentHook.data || [];
-  const isLoading = currentHook.loading;
-  const dataError = currentHook.error;
+  // Handle condition report submission
+  const handleSendCondition = async () => {
+    if (!reportAnimalType || !reportCategory || !reportMessage) {
+      alert("Please fill all fields.");
+      return;
+    }
+
+    try {
+      const docRef = await addDoc(collection(db, "vetRequests"), {
+        farmerId: auth.currentUser.uid,
+        animalType: reportAnimalType,
+        category: reportCategory,
+        message: reportMessage,
+        status: "pending",
+        createdAt: serverTimestamp()
+      });
+
+      // Notify all veterinarians via backend
+      try {
+        await fetch("http://localhost:5000/notify-vets-new-request", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            requestId: docRef.id,
+            animalType: reportAnimalType,
+            category: reportCategory
+          })
+        });
+        console.log("Veterinarians notified successfully");
+      } catch (notifError) {
+        console.error("Failed to notify veterinarians:", notifError);
+        // Don't block the main flow if notification fails
+      }
+
+      alert("Condition sent to veterinarian successfully!");
+      
+      setShowConditionModal(false);
+      setReportAnimalType("");
+      setReportCategory("");
+      setReportMessage("");
+    } catch (err) {
+      console.log(err);
+      alert("Error sending report.");
+    }
+  };
+
+  // Use data from shared animals database
+  const currentData = selectedAnimal === "pigs" ? pigData : chickenData;
+  const isLoading = animalsLoading;
+  const dataError = null; // Error handling done via try-catch in operations
 
   const handleAddEntry = async () => {
     if (!newEntry.date || !newEntry.category || !newEntry.gender ||
@@ -140,21 +400,27 @@ export default function FarmerDashboard() {
 
     try {
       setOperationError(null);
-      const livestockData = {
-        date: newEntry.date,
+      
+      // Save to shared animals collection
+      await addDoc(collection(db, "animals"), {
+        ownerId: currentUser.uid,
+        type: selectedAnimal, // pigs or chickens
         category: newEntry.category,
         gender: newEntry.gender,
-        quantity: parseInt(newEntry.quantity),
-        price: parseFloat(newEntry.price)
-      };
+        quantity: Number(newEntry.quantity),
+        price: Number(newEntry.price),
+        date: newEntry.date,
+        healthStatus: "Healthy",
+        createdAt: serverTimestamp(),
+        lastUpdated: serverTimestamp()
+      });
 
-      await currentHook.add(livestockData);
-      showSuccess("Livestock entry added successfully");
+      showSuccess("Animal entry saved successfully!");
       
       setNewEntry({ date: "", category: "", gender: "", quantity: "", price: "" });
       setShowAddForm(false);
     } catch (error) {
-      console.error("Error adding livestock:", error);
+      console.error("Error adding animal:", error);
       const errorMessage = getFirestoreErrorMessage(error);
       setOperationError(errorMessage);
       showError(errorMessage);
@@ -166,36 +432,17 @@ export default function FarmerDashboard() {
 
     try {
       setOperationError(null);
-      await currentHook.delete(docId);
-      showSuccess("Livestock entry deleted successfully");
+      await deleteDoc(doc(db, "animals", docId));
+      showSuccess("Animal entry deleted successfully");
     } catch (error) {
-      console.error("Error deleting livestock:", error);
+      console.error("Error deleting animal:", error);
       const errorMessage = getFirestoreErrorMessage(error);
       setOperationError(errorMessage);
       showError(errorMessage);
     }
   };
 
-  const handleEditEntry = (row) => setEditingRow(row.id);
 
-  const handleEntryChange = (id, field, value) => {
-    // This function is for inline editing - we'll keep it for UI state
-    // but won't use it since we removed inline editing functionality
-  };
-
-  const handleSaveEdit = async (docId, updatedData) => {
-    try {
-      setOperationError(null);
-      await currentHook.update(docId, updatedData);
-      showSuccess("Livestock entry updated successfully");
-      setEditingRow(null);
-    } catch (error) {
-      console.error("Error updating livestock:", error);
-      const errorMessage = getFirestoreErrorMessage(error);
-      setOperationError(errorMessage);
-      showError(errorMessage);
-    }
-  };
 
   const handleLogout = async () => {
     try {
@@ -224,7 +471,10 @@ export default function FarmerDashboard() {
             <span className="text-xl font-bold text-gray-800">Smart Bio Farm</span>
           </div>
 
-          <div className="relative">
+          <div className="flex items-center gap-4">
+            <LanguageSwitcher />
+            
+            <div className="relative">
             <button
               onClick={() => setShowProfileMenu(!showProfileMenu)}
               className="flex items-center gap-2 bg-green-100 hover:bg-green-200 px-4 py-2 rounded-lg transition"
@@ -250,10 +500,11 @@ export default function FarmerDashboard() {
                   className="flex items-center gap-2 w-full text-red-600 hover:bg-red-50 px-3 py-2 rounded-lg transition"
                 >
                   <LogOut className="w-4 h-4" />
-                  Logout
+                  {t("logout")}
                 </button>
               </div>
             )}
+            </div>
           </div>
         </div>
       </nav>
@@ -261,41 +512,44 @@ export default function FarmerDashboard() {
       {/* Main Page Container */}
       <div className="max-w-7xl mx-auto px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
 
-        {/* Live Temperature + Humidity */}
+        {/* Live Weather - Temperature + Humidity */}
         <div className="bg-gradient-to-r from-orange-500 via-purple-500 to-blue-500 rounded-xl p-6 text-white shadow-lg col-span-2">
-          {envLoading ? (
+          {weatherLoading ? (
             <div className="flex justify-center items-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-              <p className="ml-3 text-white">Loading environmental data...</p>
+              <p className="ml-3 text-white">{t("loadingWeather")}</p>
             </div>
-          ) : envError ? (
+          ) : !weather ? (
             <div className="bg-red-500 bg-opacity-20 border border-white border-opacity-30 rounded-lg p-4">
-              <p className="font-semibold">Error loading environmental data</p>
-              <p className="text-sm mt-1">{envError}</p>
+              <p className="font-semibold">{t("unableToLoadWeather")}</p>
+              <p className="text-sm mt-1">{t("checkConnection")}</p>
             </div>
           ) : (
             <>
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <p className="text-sm font-semibold flex items-center gap-2">
-                    <Thermometer className="w-6 h-6" /> Live Temperature
+                    <Thermometer className="w-6 h-6" /> {t("liveTemperature")}
                   </p>
-                  <p className="text-4xl font-bold">{liveData.temperature}°C</p>
+                  <p className="text-4xl font-bold">{weather.temperature}°C</p>
+                  <p className="text-sm opacity-80 mt-1">{t("feelsLike")} {weather.feelsLike}°C</p>
                 </div>
                 <div>
                   <p className="text-sm font-semibold flex items-center gap-2">
-                    <Droplets className="w-6 h-6" /> Live Humidity
+                    <Droplets className="w-6 h-6" /> {t("liveHumidity")}
                   </p>
-                  <p className="text-4xl font-bold">{liveData.humidity}%</p>
+                  <p className="text-4xl font-bold">{weather.humidity}%</p>
+                  <p className="text-sm opacity-80 mt-1">{t("wind")}: {weather.windSpeed} m/s</p>
                 </div>
               </div>
-              {liveData.timestamp && (
-                <div className="mt-4 pt-4 border-t border-white border-opacity-30">
-                  <p className="text-xs opacity-90">
-                    Last updated: {formatTimestamp(liveData.timestamp)}
-                  </p>
-                </div>
-              )}
+              <div className="mt-4 pt-4 border-t border-white border-opacity-30">
+                <p className="text-sm opacity-90">
+                  📍 {weather.city} • {weather.description.toUpperCase()}
+                </p>
+                <p className="text-xs opacity-75 mt-1">
+                  {t("updatesEvery5Min")}
+                </p>
+              </div>
             </>
           )}
         </div>
@@ -303,51 +557,77 @@ export default function FarmerDashboard() {
         {/* Animal Overview */}
         <div className="bg-white rounded-xl shadow-lg p-6">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-bold text-gray-800">Animal Overview</h3>
+            <h3 className="text-xl font-bold text-gray-800">{t("animalOverview")}</h3>
             <button
               onClick={() => setShowAnimalModal(true)}
               className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold"
             >
-              🐾 Manage Animals
+              🐾 {t("manageAnimals")}
             </button>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <StatBox icon={Package} value={animalStats.totalAnimals} label="Total Animals" color="green" />
-            <StatBox icon={TrendingUp} value={animalStats.activeCategories} label="Active Categories" color="blue" />
-            <StatBox icon={CheckCircle} value={animalStats.todayUpdates} label="Today's Updates" color="purple" />
-            <StatBox icon={DollarSign} value={`₹${animalStats.totalValue.toLocaleString()}`} label="Total Value" color="orange" />
+            <StatBox icon={Package} value={animalStats.totalAnimals} label={t("totalAnimals")} color="green" />
+            <StatBox icon={TrendingUp} value={animalStats.activeCategories} label={t("activeCategories")} color="blue" />
+            <StatBox icon={CheckCircle} value={animalStats.todayUpdates} label={t("todayUpdates")} color="purple" />
+            <StatBox icon={DollarSign} value={`₹${animalStats.totalValue.toLocaleString()}`} label={t("totalValue")} color="orange" />
+          </div>
+        </div>
+
+        {/* Report Condition & My Requests */}
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <h3 className="text-xl font-bold text-gray-800 mb-4">
+            {t("veterinaryServices")}
+          </h3>
+          <p className="text-gray-600 mb-4">
+            {t("reportHealthIssues")}
+          </p>
+          
+          <div className="flex gap-4">
+            <button
+              onClick={() => setShowConditionModal(true)}
+              className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+            >
+              {t("reportCondition")}
+            </button>
+            
+            <button
+              onClick={() => navigate("/farmer/requests")}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+            >
+              {t("myVetRequests")}
+            </button>
           </div>
         </div>
 
         {/* Alerts */}
         <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-bold text-gray-800">Live Alerts</h3>
+          <div className="flex justify-between items-center mb-4 gap-4">
+            <h3 className="text-xl font-bold text-gray-800">{t("liveAlerts")}</h3>
             
             <button
               onClick={() => setShowAddReportModal(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 whitespace-nowrap"
             >
               <Plus className="w-4 h-4" />
-              Add Report
+              {t("addReport")}
             </button>
           </div>
 
           {alertsLoading ? (
             <div className="flex justify-center items-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <p className="ml-3 text-gray-600">Loading alerts...</p>
+              <p className="ml-3 text-gray-600">{t("loading")}</p>
             </div>
           ) : alertsError ? (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-              <p className="font-semibold">Error loading alerts</p>
+              <p className="font-semibold">{t("error")}</p>
               <p className="text-sm mt-1">{alertsError}</p>
             </div>
           ) : (
             <div className="space-y-3 max-h-64 overflow-y-auto">
               {firestoreAlerts.length === 0 ? (
-                <p className="text-center text-gray-500 py-4">No alerts yet. Add your first report above.</p>
+                <p className="text-center text-gray-500 py-4">{t("noAlertsYet")}</p>
               ) : (
                 firestoreAlerts.map((alert) => (
                   <div
@@ -371,8 +651,16 @@ export default function FarmerDashboard() {
                         }`}
                       />
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-800">{alert.message}</p>
-                        <p className="text-xs text-gray-500 mt-1">{formatRelativeTime(alert.timestamp)}</p>
+                        <p className="text-sm font-medium text-gray-800 mb-2">{alert.message}</p>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-xs text-gray-500">{formatRelativeTime(alert.timestamp, t)}</span>
+                          {alert.createdByName && (
+                            <>
+                              <span className="text-xs text-gray-400">•</span>
+                              <span className="text-xs text-gray-600 font-medium">{t("by")} {alert.createdByName}</span>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -385,7 +673,7 @@ export default function FarmerDashboard() {
 
         <div className="mt-6">
           <AnimalChart data={
-            selectedAnimal === "pigs" ? pigsHook.data : chickensHook.data
+            allAnimalsData.filter(animal => animal.type === selectedAnimal)
           } />
         </div>
 
@@ -393,7 +681,7 @@ export default function FarmerDashboard() {
         <div className="max-w-7xl mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Animal Quantity Stats */}
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Animal Quantity Stats</h3>
+            <h3 className="text-xl font-bold text-gray-800 mb-4">{t("animalQuantityStats")}</h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={animalQuantityData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -409,7 +697,7 @@ export default function FarmerDashboard() {
 
           {/* Price Trends */}
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Price Trends</h3>
+            <h3 className="text-xl font-bold text-gray-800 mb-4">{t("priceTrends")}</h3>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={priceTrendData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -591,51 +879,95 @@ export default function FarmerDashboard() {
         </div>
       )}
 
+      {/* Report Condition Modal */}
+      {showConditionModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full">
+            
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-gray-800">Report Animal Condition</h3>
+              <button onClick={() => setShowConditionModal(false)}>
+                <X className="w-6 h-6 text-gray-500 hover:text-gray-700" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Animal Type */}
+              <div>
+                <label className="block text-gray-700 font-semibold mb-2">
+                  Select Animal Type
+                </label>
+                <select
+                  value={reportAnimalType}
+                  onChange={(e) => setReportAnimalType(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="">Select</option>
+                  <option value="pigs">Pigs</option>
+                  <option value="chickens">Chickens</option>
+                </select>
+              </div>
+
+              {/* Category */}
+              <div>
+                <label className="block text-gray-700 font-semibold mb-2">
+                  Category
+                </label>
+                <input
+                  type="text"
+                  value={reportCategory}
+                  onChange={(e) => setReportCategory(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  placeholder="Boar, Sow, Broiler, etc"
+                />
+              </div>
+
+              {/* Condition Description */}
+              <div>
+                <label className="block text-gray-700 font-semibold mb-2">
+                  Describe the Condition
+                </label>
+                <textarea
+                  value={reportMessage}
+                  onChange={(e) => setReportMessage(e.target.value)}
+                  rows="4"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  placeholder="Explain the problem or symptoms..."
+                ></textarea>
+              </div>
+
+              {/* Submit */}
+              <button
+                onClick={handleSendCondition}
+                className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-semibold"
+              >
+                Send to Veterinarian
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
 
-// Helper function to format Firestore timestamp
-function formatTimestamp(timestamp) {
-  if (!timestamp) return 'Unknown';
-  
-  // Handle Firestore Timestamp object
-  const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-  const now = new Date();
-  const diffMs = now - date;
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-
-  if (diffMins < 1) return 'Just now';
-  if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
-  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-  if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-  
-  return date.toLocaleString();
-}
-
 // Helper function to format relative time for alerts
-function formatRelativeTime(timestamp) {
+function formatRelativeTime(timestamp, t) {
   if (!timestamp) return 'Unknown';
   
   // Handle Firestore Timestamp object
   const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
   const now = new Date();
   const diffMs = now - date;
-  const diffSecs = Math.floor(diffMs / 1000);
   const diffMins = Math.floor(diffMs / 60000);
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
 
-  if (diffSecs < 10) return 'Just now';
-  if (diffSecs < 60) return `${diffSecs} seconds ago`;
-  if (diffMins === 1) return '1 minute ago';
-  if (diffMins < 60) return `${diffMins} minutes ago`;
-  if (diffHours === 1) return '1 hour ago';
-  if (diffHours < 24) return `${diffHours} hours ago`;
-  if (diffDays === 1) return '1 day ago';
-  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffMins < 1) return t("justNow");
+  if (diffMins < 60) return t("minutesAgo", { count: diffMins });
+  if (diffHours < 24) return t("hoursAgo", { count: diffHours });
+  if (diffDays < 7) return t("daysAgo", { count: diffDays });
   
   return date.toLocaleDateString();
 }
