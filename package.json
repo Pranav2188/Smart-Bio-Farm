@@ -21,15 +21,43 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "//": "=== Development Scripts ===",
+    "start": "concurrently --names \"FRONTEND,BACKEND\" --prefix-colors \"cyan,magenta\" --prefix \"[{name}]\" \"npm run start:frontend\" \"npm run start:backend\"",
+    "start:comment": "Starts both frontend (port 3000) and backend (port 5000) servers concurrently with color-coded output",
+    "start:frontend": "react-scripts start",
+    "start:frontend:comment": "Starts only the React development server on port 3000",
+    "start:backend": "npm start --prefix backend",
+    "start:backend:comment": "Starts only the backend notification server on port 5000",
+    "dev": "concurrently --names \"FRONTEND,BACKEND\" --prefix-colors \"cyan,magenta\" --prefix \"[{name}]\" --kill-others-on-fail \"npm run start:frontend\" \"npm run start:backend\"",
+    "dev:comment": "Development mode with --kill-others-on-fail: stops all servers if one fails",
+    "//build": "=== Build & Test Scripts ===",
     "build": "react-scripts build",
+    "build:comment": "Creates optimized production build in /build directory",
     "test": "react-scripts test",
+    "test:comment": "Runs Jest tests in watch mode",
     "eject": "react-scripts eject",
+    "eject:comment": "WARNING: One-way operation. Ejects from Create React App configuration",
+    "//firebase": "=== Firebase Scripts ===",
     "emulators": "firebase emulators:start",
+    "emulators:comment": "Starts Firebase local emulators for testing",
     "deploy:rules": "firebase deploy --only firestore:rules",
     "deploy:indexes": "firebase deploy --only firestore:indexes",
     "deploy:firestore": "firebase deploy --only firestore",
-    "test:security": "node test-security-rules.js"
+    "test:security": "node test-security-rules.js",
+    "test:security:comment": "Tests Firestore security rules"
+  },
+  "scriptsDocumentation": {
+    "concurrentlyOptions": {
+      "--names": "Custom names for processes (FRONTEND, BACKEND)",
+      "--prefix-colors": "Colors for process output (cyan for frontend, magenta for backend)",
+      "--prefix": "Format for output prefix ([{name}] shows process name)",
+      "--kill-others-on-fail": "Stops all processes if any one fails (used in dev script)"
+    },
+    "usage": {
+      "recommended": "npm start - Starts both servers with one command",
+      "development": "npm run dev - Stricter mode that stops all on failure",
+      "separate": "Use start:frontend or start:backend to run individually"
+    }
   },
   "eslintConfig": {
     "extends": [
@@ -51,6 +79,7 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.22",
+    "concurrently": "^9.2.1",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.18"
   }

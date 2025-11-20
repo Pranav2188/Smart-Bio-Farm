@@ -22,10 +22,10 @@ cd smart-bio-farm
 
 2. **Install dependencies**
 ```bash
-# Frontend
+# Install root dependencies (includes frontend)
 npm install
 
-# Backend
+# Install backend dependencies
 cd backend
 npm install
 cd ..
@@ -38,20 +38,131 @@ cp .env.example .env
 cp backend/.env.example backend/.env
 ```
 
-4. **Start development servers**
+Edit the `.env` files with your Firebase and OpenWeatherMap credentials.
+
+### Running the Application
+
+**Single Command Startup (Recommended):**
+
+Start both frontend and backend servers with one command:
+
+```bash
+npm start
+```
+
+This will automatically start:
+- **Frontend React app** on http://localhost:3000
+- **Backend notification server** on http://localhost:5000
+
+Both servers will run concurrently with color-coded output:
+- `[FRONTEND]` - React development server logs (cyan)
+- `[BACKEND]` - Backend server logs (magenta)
+
+**Alternative: Start Servers Separately**
+
+If you prefer to run servers in separate terminals:
+
 ```bash
 # Terminal 1 - Backend
-cd backend
-npm start
+npm run start:backend
 
 # Terminal 2 - Frontend
-npm start
+npm run start:frontend
 ```
 
-5. **Open application**
+**Development Mode with Auto-Restart:**
+
+For stricter error handling (stops all servers if one fails):
+
+```bash
+npm run dev
 ```
-http://localhost:3000
+
+### Troubleshooting
+
+#### Port Already in Use
+
+If you see an error like `EADDRINUSE` or "port already in use":
+
+**For port 5000 (backend):**
+```bash
+# Windows
+netstat -ano | findstr :5000
+taskkill /PID <PID> /F
+
+# macOS/Linux
+lsof -ti:5000 | xargs kill -9
 ```
+
+**For port 3000 (frontend):**
+```bash
+# Windows
+netstat -ano | findstr :3000
+taskkill /PID <PID> /F
+
+# macOS/Linux
+lsof -ti:3000 | xargs kill -9
+```
+
+Or use the kill-port utility:
+```bash
+npx kill-port 5000 3000
+```
+
+#### Backend Fails to Start
+
+**Missing serviceAccountKey.json:**
+```
+Error: Cannot find module './serviceAccountKey.json'
+```
+
+**Solution:** Ensure `backend/serviceAccountKey.json` exists with your Firebase service account credentials. Download it from Firebase Console → Project Settings → Service Accounts.
+
+**Firebase Connection Error:**
+```
+Error: Failed to initialize Firebase Admin SDK
+```
+
+**Solution:** 
+1. Verify `serviceAccountKey.json` has valid credentials
+2. Check your Firebase project ID matches
+3. Run the connection test: `node backend/test-firebase-connection.js`
+
+#### Frontend Fails to Start
+
+**Missing dependencies:**
+```bash
+npm install
+```
+
+**React Scripts Error:**
+```bash
+# Clear cache and reinstall
+rm -rf node_modules package-lock.json
+npm install
+```
+
+#### Both Servers Won't Stop
+
+If Ctrl+C doesn't stop the servers:
+
+**Windows:**
+```bash
+taskkill /F /IM node.exe
+```
+
+**macOS/Linux:**
+```bash
+pkill -f node
+```
+
+#### Environment Variables Not Loading
+
+Ensure `.env` files are in the correct locations:
+- Root `.env` for frontend variables
+- `backend/.env` for backend variables
+
+Restart the servers after editing `.env` files.
 
 ---
 
@@ -109,17 +220,18 @@ The comprehensive documentation includes:
 
 ## 📱 Available Scripts
 
-### Frontend
+### Development
 ```bash
-npm start          # Start development server
-npm run build      # Create production build
-npm test           # Run tests
+npm start              # Start both frontend and backend servers (recommended)
+npm run start:frontend # Start only frontend React app
+npm run start:backend  # Start only backend notification server
+npm run dev            # Start both with strict error handling (stops all if one fails)
 ```
 
-### Backend
+### Build & Test
 ```bash
-cd backend
-npm start          # Start backend server
+npm run build          # Create production build
+npm test               # Run frontend tests
 ```
 
 ### Testing
@@ -127,6 +239,14 @@ npm start          # Start backend server
 node test-notifications.js              # Test notification system
 node test-weather.js                    # Test weather integration
 node backend/test-firebase-connection.js # Test Firebase connection
+```
+
+### Firebase
+```bash
+npm run emulators      # Start Firebase emulators
+npm run deploy:rules   # Deploy Firestore security rules
+npm run deploy:indexes # Deploy Firestore indexes
+npm run test:security  # Test security rules
 ```
 
 ---

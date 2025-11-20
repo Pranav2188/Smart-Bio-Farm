@@ -286,7 +286,47 @@ app.post("/notify-farmers-new-alert", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+
+const server = app.listen(PORT, () => {
+  console.log('\n' + '='.repeat(60));
   console.log(`🚀 Notification server running on port ${PORT}`);
   console.log(`📡 Health check: http://localhost:${PORT}/`);
+  console.log(`✅ Server started successfully at ${new Date().toLocaleTimeString()}`);
+  console.log('='.repeat(60) + '\n');
+});
+
+// Enhanced error handling for port conflicts
+server.on('error', (error) => {
+  if (error.code === 'EADDRINUSE') {
+    console.error('\n' + '❌'.repeat(30));
+    console.error(`\n🚨 ERROR: Port ${PORT} is already in use!\n`);
+    console.error('This usually means another instance of the server is running.');
+    console.error('\n📋 To fix this issue:\n');
+    console.error(`  1. Find and stop the process using port ${PORT}:`);
+    console.error(`     Windows: netstat -ano | findstr :${PORT}`);
+    console.error(`     Mac/Linux: lsof -ti:${PORT}`);
+    console.error(`\n  2. Or kill the process directly:`);
+    console.error(`     Windows: taskkill /PID <PID> /F`);
+    console.error(`     Mac/Linux: kill -9 $(lsof -ti:${PORT})`);
+    console.error(`\n  3. Or use a different port:`);
+    console.error(`     PORT=5001 npm start\n`);
+    console.error('❌'.repeat(30) + '\n');
+    process.exit(1);
+  } else if (error.code === 'EACCES') {
+    console.error('\n' + '❌'.repeat(30));
+    console.error(`\n🚨 ERROR: Permission denied to use port ${PORT}!\n`);
+    console.error('This usually means you need elevated privileges.');
+    console.error('\n📋 To fix this issue:\n');
+    console.error(`  1. Use a port number above 1024 (e.g., PORT=5000)`);
+    console.error(`  2. Or run with elevated privileges (not recommended)\n`);
+    console.error('❌'.repeat(30) + '\n');
+    process.exit(1);
+  } else {
+    console.error('\n' + '❌'.repeat(30));
+    console.error(`\n🚨 ERROR: Failed to start server!\n`);
+    console.error(`Error: ${error.message}`);
+    console.error(`Code: ${error.code}\n`);
+    console.error('❌'.repeat(30) + '\n');
+    process.exit(1);
+  }
 });
