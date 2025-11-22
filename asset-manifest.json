@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/Smart-Bio-Farm/static/css/main.89fdfaf7.css",
-    "main.js": "/Smart-Bio-Farm/static/js/main.a3e0b47a.js",
+    "main.js": "/Smart-Bio-Farm/static/js/main.646f306e.js",
     "static/js/453.334db5cd.chunk.js": "/Smart-Bio-Farm/static/js/453.334db5cd.chunk.js",
     "index.html": "/Smart-Bio-Farm/index.html",
     "main.89fdfaf7.css.map": "/Smart-Bio-Farm/static/css/main.89fdfaf7.css.map",
-    "main.a3e0b47a.js.map": "/Smart-Bio-Farm/static/js/main.a3e0b47a.js.map",
+    "main.646f306e.js.map": "/Smart-Bio-Farm/static/js/main.646f306e.js.map",
     "453.334db5cd.chunk.js.map": "/Smart-Bio-Farm/static/js/453.334db5cd.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.89fdfaf7.css",
-    "static/js/main.a3e0b47a.js"
+    "static/js/main.646f306e.js"
   ]
 }
