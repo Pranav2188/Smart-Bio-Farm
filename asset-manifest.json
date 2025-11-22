@@ -1,17 +1,17 @@
 {
   "files": {
     "main.css": "/Smart-Bio-Farm/static/css/main.89fdfaf7.css",
-    "main.js": "/Smart-Bio-Farm/static/js/main.ffbf1895.js",
+    "main.js": "/Smart-Bio-Farm/static/js/main.fba6d665.js",
     "static/js/798.a3812e32.chunk.js": "/Smart-Bio-Farm/static/js/798.a3812e32.chunk.js",
     "static/js/453.334db5cd.chunk.js": "/Smart-Bio-Farm/static/js/453.334db5cd.chunk.js",
     "index.html": "/Smart-Bio-Farm/index.html",
     "main.89fdfaf7.css.map": "/Smart-Bio-Farm/static/css/main.89fdfaf7.css.map",
-    "main.ffbf1895.js.map": "/Smart-Bio-Farm/static/js/main.ffbf1895.js.map",
+    "main.fba6d665.js.map": "/Smart-Bio-Farm/static/js/main.fba6d665.js.map",
     "798.a3812e32.chunk.js.map": "/Smart-Bio-Farm/static/js/798.a3812e32.chunk.js.map",
     "453.334db5cd.chunk.js.map": "/Smart-Bio-Farm/static/js/453.334db5cd.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.89fdfaf7.css",
-    "static/js/main.ffbf1895.js"
+    "static/js/main.fba6d665.js"
   ]
 }
