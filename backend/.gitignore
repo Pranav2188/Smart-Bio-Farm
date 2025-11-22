@@ -8,6 +8,7 @@ node_modules/
 
 # Firebase service account key (NEVER COMMIT THIS!)
 serviceAccountKey.json
+firebase-credentials-for-render.txt
 
 # Logs
 logs
