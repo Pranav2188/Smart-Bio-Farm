@@ -124,12 +124,18 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (!currentUser) return;
 
-    const unsubscribe = setupForegroundMessageListener((payload) => {
+    let unsubscribe = () => {};
+    
+    setupForegroundMessageListener((payload) => {
       console.log("Received foreground notification:", payload);
       // You can add custom handling here, like showing a toast
+    }).then((unsub) => {
+      unsubscribe = unsub;
+    }).catch((err) => {
+      console.error("Failed to setup foreground message listener:", err);
     });
 
-    return unsubscribe;
+    return () => unsubscribe();
   }, [currentUser]);
 
   const value = {

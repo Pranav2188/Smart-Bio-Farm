@@ -84,14 +84,25 @@ export default function GovernmentSignup() {
     setLoading(true);
     
     try {
-      // Verify admin code with backend (more secure)
-      const codeValidation = await fetch('http://localhost:5000/validate-admin-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: adminCode })
-      });
+      // Verify admin code (fallback to client-side if backend unavailable)
+      let valid = false;
       
-      const { valid } = await codeValidation.json();
+      try {
+        const codeValidation = await fetch('http://localhost:5000/validate-admin-code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: adminCode }),
+          signal: AbortSignal.timeout(5000)
+        });
+        
+        const result = await codeValidation.json();
+        valid = result.valid;
+      } catch (backendError) {
+        // Backend unavailable, use client-side validation as fallback
+        console.log("Backend unavailable, using client-side admin code validation");
+        const FALLBACK_ADMIN_CODE = "SMART_GOV_2025";
+        valid = adminCode === FALLBACK_ADMIN_CODE;
+      }
       
       if (!valid) {
         setError("Invalid admin access code. Contact system administrator.");

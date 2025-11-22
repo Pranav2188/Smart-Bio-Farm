@@ -2,6 +2,7 @@
   "name": "smart-bio-farm",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://Pranav2188.github.io/Smart-Bio-Farm",
   "dependencies": {
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
@@ -37,9 +38,19 @@
     "test:comment": "Runs Jest tests in watch mode",
     "eject": "react-scripts eject",
     "eject:comment": "WARNING: One-way operation. Ejects from Create React App configuration",
+    "//deployment": "=== Deployment Scripts ===",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
+    "deploy:comment": "Builds and deploys to GitHub Pages",
     "//firebase": "=== Firebase Scripts ===",
     "emulators": "firebase emulators:start",
     "emulators:comment": "Starts Firebase local emulators for testing",
+    "deploy:firebase": "npm run build && firebase deploy --only hosting",
+    "deploy:firebase:comment": "Builds and deploys the frontend to Firebase Hosting (free tier)",
+    "deploy:hosting": "npm run build && firebase deploy --only hosting",
+    "deploy:hosting:comment": "Builds and deploys only the hosting (frontend)",
+    "deploy:all": "npm run build && firebase deploy",
+    "deploy:all:comment": "Deploys everything (requires Blaze plan for Functions)",
     "deploy:rules": "firebase deploy --only firestore:rules",
     "deploy:indexes": "firebase deploy --only firestore:indexes",
     "deploy:firestore": "firebase deploy --only firestore",
@@ -80,6 +91,7 @@
   "devDependencies": {
     "autoprefixer": "^10.4.22",
     "concurrently": "^9.2.1",
+    "gh-pages": "^6.3.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.18"
   }

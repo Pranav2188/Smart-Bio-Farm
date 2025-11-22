@@ -22,7 +22,7 @@ import GovernmentDashboard from "./pages/GovernmentDashboard";
 export default function App() {
   return (
     <ErrorBoundary>
-      <Router>
+      <Router basename="/Smart-Bio-Farm">
         <ToastProvider>
           <AuthProvider>
             <OfflineIndicator />

@@ -5,6 +5,7 @@ import { collection, onSnapshot, query, orderBy, updateDoc, doc, addDoc, serverT
 import { AlertTriangle, CheckCircle, Clock, ArrowLeft, Stethoscope, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "../components/LanguageSwitcher";
+import { notifyFarmerTreatment } from "../services/pushNotificationService";
 
 export default function VetRequests() {
   const navigate = useNavigate();
@@ -89,18 +90,21 @@ export default function VetRequests() {
         completedAt: serverTimestamp()
       });
 
-      // 3. Notify farmer via backend
+      // 3. Notify farmer
       try {
-        await fetch("http://localhost:5000/notify-farmer-treatment", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            farmerId: selectedRequest.farmerId,
-            animalType: selectedRequest.animalType,
-            requestId: selectedRequest.id
-          })
+        const result = await notifyFarmerTreatment({
+          farmerName: selectedRequest.farmerName || 'Farmer',
+          vetName: auth.currentUser?.displayName || auth.currentUser?.email || 'Veterinarian',
+          animalType: selectedRequest.animalType,
+          diagnosis: treatment.diagnosis,
+          treatment: treatment.medicines
         });
-        console.log("Farmer notified successfully");
+        
+        if (result.success) {
+          console.log("Farmer notified successfully");
+        } else if (result.method === 'fallback') {
+          console.log(result.message);
+        }
       } catch (notifError) {
         console.error("Failed to notify farmer:", notifError);
         // Don't block the main flow if notification fails

@@ -11,6 +11,7 @@ import { useToast } from "../components/ToastContainer";
 import { getWeather, getUserLocation } from "../utils/weatherService";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "../components/LanguageSwitcher";
+import { notifyFarmersNewAlert } from "../services/pushNotificationService";
 
 export default function GovernmentDashboard() {
   const { currentUser, userProfile, signOut } = useAuth();
@@ -132,17 +133,19 @@ export default function GovernmentDashboard() {
         timestamp: serverTimestamp()
       });
 
-      // Send notifications via backend
+      // Send notifications
       try {
-        await fetch('http://localhost:5000/notify-farmers-new-alert', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            alertType: newAlert.type,
-            alertMessage: newAlert.message,
-            createdByName: `Government - ${userProfile?.department || "Official"}`
-          })
+        const result = await notifyFarmersNewAlert({
+          alertType: newAlert.type,
+          alertMessage: newAlert.message,
+          createdByName: `Government - ${userProfile?.department || "Official"}`
         });
+        
+        if (result.success) {
+          console.log(`Alert sent to ${result.count} farmers`);
+        } else if (result.method === 'fallback') {
+          console.log(result.message);
+        }
       } catch (notifError) {
         console.error("Notification error:", notifError);
       }

@@ -4,7 +4,27 @@ const admin = require("firebase-admin");
 const path = require("path");
 
 // Load Firebase admin private key
-const serviceAccount = require(path.join(__dirname, "serviceAccountKey.json"));
+let serviceAccount;
+
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  // Production: Use environment variable (JSON string)
+  try {
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    console.log("✅ Using Firebase credentials from environment variable");
+  } catch (error) {
+    console.error("❌ Failed to parse FIREBASE_SERVICE_ACCOUNT:", error.message);
+    process.exit(1);
+  }
+} else {
+  // Development: Use local file
+  try {
+    serviceAccount = require(path.join(__dirname, "serviceAccountKey.json"));
+    console.log("✅ Using Firebase credentials from local file");
+  } catch (error) {
+    console.error("❌ serviceAccountKey.json not found. Please add it or set FIREBASE_SERVICE_ACCOUNT env var");
+    process.exit(1);
+  }
+}
 
 // Initialize Firebase Admin
 admin.initializeApp({

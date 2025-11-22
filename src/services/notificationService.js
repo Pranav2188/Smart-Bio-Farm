@@ -1,4 +1,4 @@
-import { messaging, VAPID_KEY } from "../firebase";
+import { getMessagingInstance, VAPID_KEY } from "../firebase";
 import { getToken, onMessage } from "firebase/messaging";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
@@ -10,6 +10,9 @@ import { db } from "../firebase";
  */
 export const requestNotificationPermission = async (userId) => {
   try {
+    // Wait for messaging to be initialized
+    const messaging = await getMessagingInstance();
+    
     // Check if messaging is supported
     if (!messaging) {
       console.warn("Firebase Messaging is not supported in this browser");
@@ -22,9 +25,10 @@ export const requestNotificationPermission = async (userId) => {
     if (permission === "granted") {
       console.log("Notification permission granted");
 
-      // Get FCM token
+      // Get FCM token with custom service worker
       const token = await getToken(messaging, {
-        vapidKey: VAPID_KEY
+        vapidKey: VAPID_KEY,
+        serviceWorkerRegistration: await navigator.serviceWorker.getRegistration(`${process.env.PUBLIC_URL}/`)
       });
 
       if (token) {
@@ -89,7 +93,9 @@ export const saveFCMToken = async (userId, token) => {
  * Setup foreground message listener
  * @param {Function} callback - Callback function to handle messages
  */
-export const setupForegroundMessageListener = (callback) => {
+export const setupForegroundMessageListener = async (callback) => {
+  const messaging = await getMessagingInstance();
+  
   if (!messaging) {
     console.warn("Firebase Messaging is not supported");
     return () => {};
@@ -102,8 +108,8 @@ export const setupForegroundMessageListener = (callback) => {
     if (Notification.permission === "granted") {
       new Notification(payload.notification?.title || "Smart Bio Farm", {
         body: payload.notification?.body || "You have a new notification",
-        icon: "/logo192.png",
-        badge: "/logo192.png",
+        icon: `${process.env.PUBLIC_URL}/logo192.png`,
+        badge: `${process.env.PUBLIC_URL}/logo192.png`,
         data: payload.data
       });
     }
@@ -119,9 +125,10 @@ export const setupForegroundMessageListener = (callback) => {
 
 /**
  * Check if notifications are supported and enabled
- * @returns {boolean}
+ * @returns {Promise<boolean>}
  */
-export const areNotificationsSupported = () => {
+export const areNotificationsSupported = async () => {
+  const messaging = await getMessagingInstance();
   return "Notification" in window && messaging !== null;
 };
 

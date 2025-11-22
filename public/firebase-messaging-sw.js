@@ -20,8 +20,8 @@ messaging.onBackgroundMessage((payload) => {
   const notificationTitle = payload.notification?.title || "Smart Bio Farm";
   const notificationOptions = {
     body: payload.notification?.body || "You have a new notification",
-    icon: "/logo192.png",
-    badge: "/logo192.png",
+    icon: "/Smart-Bio-Farm/logo192.png",
+    badge: "/Smart-Bio-Farm/logo192.png",
     tag: payload.data?.tag || "default",
     data: payload.data
   };
@@ -36,6 +36,6 @@ self.addEventListener('notificationclick', (event) => {
 
   // Open the app when notification is clicked
   event.waitUntil(
-    clients.openWindow(event.notification.data?.url || '/')
+    clients.openWindow(event.notification.data?.url || '/Smart-Bio-Farm/')
   );
 });

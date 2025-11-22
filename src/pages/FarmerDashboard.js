@@ -27,6 +27,7 @@ import { db, auth } from "../firebase";
 import { collection, addDoc, deleteDoc, doc, serverTimestamp, query, where, getDocs, onSnapshot } from "firebase/firestore";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "../components/LanguageSwitcher";
+import { notifyFarmersNewAlert, notifyVetsNewRequest } from "../services/pushNotificationService";
 
 export default function FarmerDashboard() {
   const navigate = useNavigate();
@@ -306,21 +307,18 @@ export default function FarmerDashboard() {
         message: newReport.message
       });
       
-      // Send push notifications to all farmers via backend
+      // Send push notifications to all farmers
       try {
-        const response = await fetch('http://localhost:5000/notify-farmers-new-alert', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            alertType: newReport.type,
-            alertMessage: newReport.message,
-            createdByName: currentUser?.displayName || currentUser?.email || 'A Farmer'
-          })
+        const result = await notifyFarmersNewAlert({
+          alertType: newReport.type,
+          alertMessage: newReport.message,
+          createdByName: currentUser?.displayName || currentUser?.email || 'A Farmer'
         });
         
-        if (response.ok) {
-          const data = await response.json();
-          console.log(`Alert notification sent to ${data.successCount} farmers`);
+        if (result.success) {
+          console.log(`Alert notification sent to ${result.count} farmers`);
+        } else if (result.method === 'fallback') {
+          console.log(result.message);
         }
       } catch (notifError) {
         // Don't fail the whole operation if notification fails
@@ -346,7 +344,7 @@ export default function FarmerDashboard() {
     }
 
     try {
-      const docRef = await addDoc(collection(db, "vetRequests"), {
+      await addDoc(collection(db, "vetRequests"), {
         farmerId: auth.currentUser.uid,
         animalType: reportAnimalType,
         category: reportCategory,
@@ -355,18 +353,20 @@ export default function FarmerDashboard() {
         createdAt: serverTimestamp()
       });
 
-      // Notify all veterinarians via backend
+      // Notify all veterinarians
       try {
-        await fetch("http://localhost:5000/notify-vets-new-request", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            requestId: docRef.id,
-            animalType: reportAnimalType,
-            category: reportCategory
-          })
+        const result = await notifyVetsNewRequest({
+          farmerName: currentUser?.displayName || currentUser?.email || 'A Farmer',
+          animalType: reportAnimalType,
+          symptoms: reportMessage,
+          urgency: reportCategory
         });
-        console.log("Veterinarians notified successfully");
+        
+        if (result.success) {
+          console.log(`Veterinarians notified successfully (${result.count} vets)`);
+        } else if (result.method === 'fallback') {
+          console.log(result.message);
+        }
       } catch (notifError) {
         console.error("Failed to notify veterinarians:", notifError);
         // Don't block the main flow if notification fails
