@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunksmart_bio_farm=self.webpackChunksmart_bio_farm||[]).push([[798],{6798:(r,e,s)=>{s.d(e,{registerServiceWorker:()=>a});const a=async()=>{if("serviceWorker"in navigator)try{const r="".concat("/Smart-Bio-Farm","/firebase-messaging-sw.js"),e=await navigator.serviceWorker.register(r,{scope:"".concat("/Smart-Bio-Farm","/")});return console.log("Service Worker registered successfully:",e),e}catch(r){return console.error("Service Worker registration failed:",r),null}return null}}}]);
+//# sourceMappingURL=798.a3812e32.chunk.js.map
