@@ -5,7 +5,14 @@ module.exports = {
     "./public/index.html",
   ],
   theme: {
-    extend: {},
+    extend: {
+      screens: {
+        'xs': '475px',
+        // sm: 640px (default)
+        // md: 768px (default)
+        // lg: 1024px (default)
+      },
+    },
   },
   plugins: [],
 }

@@ -463,24 +463,27 @@ export default function FarmerDashboard() {
     <div className="min-h-screen bg-gray-50">
       {/* Navbar */}
       <nav className="bg-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 flex items-center justify-between h-16">
-          <div className="flex items-center gap-2 md:gap-3">
-            <div className="bg-green-600 p-1.5 md:p-2 rounded-lg">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 flex items-center justify-between h-16">
+          <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
+            <div className="bg-green-600 p-1.5 md:p-2 rounded-lg flex-shrink-0">
               <Sprout className="w-5 h-5 md:w-6 md:h-6 text-white" />
             </div>
-            <span className="text-lg md:text-xl font-bold text-gray-800">Smart Bio Farm</span>
+            <span className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-gray-800 whitespace-nowrap">
+              <span className="hidden xs:inline">Smart Bio Farm</span>
+              <span className="inline xs:hidden">Smart Bio</span>
+            </span>
           </div>
 
-          <div className="flex items-center gap-2 md:gap-4">
+          <div className="flex items-center gap-1.5 sm:gap-2 md:gap-4">
             <LanguageSwitcher />
             
             <div className="relative">
             <button
               onClick={() => setShowProfileMenu(!showProfileMenu)}
-              className="flex items-center gap-2 bg-green-100 hover:bg-green-200 px-3 md:px-4 py-2 rounded-lg transition"
+              className="flex items-center gap-1 sm:gap-2 bg-green-100 hover:bg-green-200 px-2 sm:px-3 md:px-4 py-2 rounded-lg transition"
             >
               <User className="w-5 h-5 md:w-6 md:h-6 text-green-700" />
-              <span className="text-green-700 font-semibold">
+              <span className="text-green-700 font-semibold text-xs sm:text-sm md:text-base">
                 {role.toUpperCase()}
               </span>
             </button>
