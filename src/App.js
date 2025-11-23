@@ -4,6 +4,7 @@ import { ToastProvider } from "./components/ToastContainer";
 import ErrorBoundary from "./components/ErrorBoundary";
 import ProtectedRoute from "./components/ProtectedRoute";
 import OfflineIndicator from "./components/OfflineIndicator";
+import CreditsFooter from "./components/CreditsFooter";
 import Welcome from "./pages/Welcome";
 import Profession from "./pages/Profession";
 import Login from "./pages/Login";
@@ -26,6 +27,7 @@ export default function App() {
         <ToastProvider>
           <AuthProvider>
             <OfflineIndicator />
+            <CreditsFooter />
             <Routes>
               <Route path="/" element={<WelcomePage />} />
               <Route path="/profession" element={<Profession />} />
