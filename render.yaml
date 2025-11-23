@@ -1,18 +1,19 @@
 services:
   - type: web
-    name: smart-bio-farm-backend
+    name: trip-defender-backend
     env: node
     region: oregon
     plan: free
     buildCommand: cd backend && npm install
-    startCommand: cd backend && node server.js
+    startCommand: cd backend && npm start
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 10000
+        value: '10000'
       - key: ADMIN_SETUP_CODE
-        value: SMART_GOV_2025
+        value: PROD_CODE_2025
       - key: FIREBASE_SERVICE_ACCOUNT
         sync: false
     healthCheckPath: /
+    branch: main

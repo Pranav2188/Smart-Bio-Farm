@@ -1,0 +1,104 @@
+# GitLab CI/CD Configuration for Trip Defender Backend
+
+stages:
+  - validate
+  - deploy
+  - health-check
+
+variables:
+  NODE_VERSION: "18"
+
+.node_setup: &node_setup
+  image: node:${NODE_VERSION}
+  before_script:
+    - cd backend
+    - npm ci
+    - echo "$FIREBASE_SERVICE_ACCOUNT" > serviceAccountKey.json
+
+# Validation Job
+validate:
+  stage: validate
+  <<: *node_setup
+  script:
+    - node scripts/validator.js --environment=$CI_ENVIRONMENT_NAME
+  after_script:
+    - rm -f backend/serviceAccountKey.json
+  only:
+    - main
+    - staging
+    - develop
+  except:
+    variables:
+      - $SKIP_VALIDATION == "true"
+
+# Deploy to Development
+deploy:development:
+  stage: deploy
+  <<: *node_setup
+  environment:
+    name: development
+    url: https://trip-defender-backend-dev.onrender.com
+  script:
+    - node scripts/deploy.js --env=development --ci
+  after_script:
+    - rm -f backend/serviceAccountKey.json
+  artifacts:
+    paths:
+      - backend/config/deployment-history.json
+      - backend/firebase-credentials-for-render.txt
+    expire_in: 30 days
+  only:
+    - develop
+
+# Deploy to Staging
+deploy:staging:
+  stage: deploy
+  <<: *node_setup
+  environment:
+    name: staging
+    url: https://trip-defender-backend-staging.onrender.com
+  script:
+    - node scripts/deploy.js --env=staging --ci
+  after_script:
+    - rm -f backend/serviceAccountKey.json
+  artifacts:
+    paths:
+      - backend/config/deployment-history.json
+      - backend/firebase-credentials-for-render.txt
+    expire_in: 30 days
+  only:
+    - staging
+
+# Deploy to Production
+deploy:production:
+  stage: deploy
+  <<: *node_setup
+  environment:
+    name: production
+    url: https://trip-defender-backend.onrender.com
+  script:
+    - node scripts/deploy.js --env=production --ci
+  after_script:
+    - rm -f backend/serviceAccountKey.json
+  artifacts:
+    paths:
+      - backend/config/deployment-history.json
+      - backend/firebase-credentials-for-render.txt
+    expire_in: 30 days
+  only:
+    - main
+  when: manual
+
+# Health Check
+health-check:
+  stage: health-check
+  <<: *node_setup
+  script:
+    - sleep 30
+    - node scripts/health-check.js --env=$CI_ENVIRONMENT_NAME
+  after_script:
+    - rm -f backend/serviceAccountKey.json
+  only:
+    - main
+    - staging
+    - develop

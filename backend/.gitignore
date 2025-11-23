@@ -5,10 +5,19 @@ node_modules/
 .env
 .env.local
 .env.production
+.env.development
+.env.staging
 
 # Firebase service account key (NEVER COMMIT THIS!)
 serviceAccountKey.json
 firebase-credentials-for-render.txt
+
+# Deployment configuration (contains sensitive data)
+config/deployment-config.json
+config/deployment-history.json
+config/.env.development
+config/.env.staging
+config/.env.production
 
 # Logs
 logs

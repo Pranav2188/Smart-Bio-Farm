@@ -227,13 +227,22 @@ app.post("/notify-vets-new-request", async (req, res) => {
 
 // 🔥 Notify farmer about treatment completion
 app.post("/notify-farmer-treatment", async (req, res) => {
-  const { farmerId, animalType, requestId } = req.body;
-
   try {
+    const { farmerId, animalType, requestId } = req.body;
+
+    // Validate required fields
+    if (!farmerId) {
+      console.log("❌ Missing farmerId");
+      return res.status(400).send({ error: "farmerId is required" });
+    }
+
+    console.log("📨 Notifying farmer about treatment:", { farmerId, animalType, requestId });
+
     // Fetch farmer data
     const farmerDoc = await db.collection("users").doc(farmerId).get();
 
     if (!farmerDoc.exists) {
+      console.log("❌ Farmer not found:", farmerId);
       return res.status(404).send({ error: "Farmer not found" });
     }
 
@@ -241,29 +250,34 @@ app.post("/notify-farmer-treatment", async (req, res) => {
     const token = farmerData.fcmToken;
 
     if (!token) {
+      console.log("⚠️ Farmer has no FCM token");
       return res.send({ success: true, message: "Farmer has no FCM token" });
     }
 
     const message = {
       notification: {
         title: "Treatment Completed!",
-        body: `Your ${animalType} has been treated. Check the details now.`,
+        body: `Your ${animalType || 'animal'} has been treated. Check the details now.`,
       },
       data: {
-        requestId: requestId,
-        animalType: animalType,
+        requestId: String(requestId || ''),
+        animalType: String(animalType || ''),
         url: "/farmer/requests"
       },
       token: token,
     };
 
     const response = await admin.messaging().send(message);
-    console.log("Successfully notified farmer:", response);
+    console.log("✅ Successfully notified farmer:", response);
     
     res.send({ success: true, response });
   } catch (error) {
-    console.error("Error notifying farmer:", error);
-    res.status(500).send({ error: error.message });
+    console.error("❌ Error notifying farmer:", error);
+    console.error("Error stack:", error.stack);
+    res.status(500).send({ 
+      error: error.message,
+      details: "Failed to notify farmer. Check server logs for details."
+    });
   }
 });
 

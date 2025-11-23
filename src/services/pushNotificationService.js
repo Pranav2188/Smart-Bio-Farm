@@ -147,15 +147,13 @@ export const notifyVetsNewRequest = async (requestData) => {
  * @returns {Promise<Object>} - Notification result
  */
 export const notifyFarmerTreatment = async (treatmentData) => {
-  const { farmerName, vetName, animalType, diagnosis, treatment } = treatmentData;
+  const { farmerId, animalType, requestId } = treatmentData;
   
   // Try backend first
   const backendResult = await sendViaBackend('/notify-farmer-treatment', {
-    farmerName,
-    vetName,
-    animalType,
-    diagnosis,
-    treatment
+    farmerId: farmerId || treatmentData.farmerName,
+    animalType: animalType || 'animal',
+    requestId: requestId || 'unknown'
   });
   
   if (backendResult.success) {

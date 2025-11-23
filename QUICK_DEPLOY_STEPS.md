@@ -1,5 +1,32 @@
 # 🚀 Quick Deploy Steps - Smart Bio Farm Backend
 
+> **Note**: This project now includes automated deployment scripts! For the new automated workflow, see [backend/docs/DEPLOYMENT.md](backend/docs/DEPLOYMENT.md)
+
+## Automated Deployment (Recommended)
+
+### Quick Start with Automation
+
+```bash
+cd backend
+
+# 1. Prepare Firebase credentials
+npm run prepare-credentials
+
+# 2. Validate setup
+npm run deploy:dev -- --validate-only
+
+# 3. Deploy to development
+npm run deploy:dev
+```
+
+For complete documentation, see [Deployment Guide](backend/docs/DEPLOYMENT.md)
+
+---
+
+## Manual Deployment (Legacy)
+
+If you prefer manual deployment, follow these steps:
+
 ## ✅ What's Already Done
 
 1. ✅ Code pushed to GitHub
@@ -128,6 +155,7 @@ In Render dashboard:
 - Check Render logs for errors
 - Verify `FIREBASE_SERVICE_ACCOUNT` is set correctly
 - Make sure it's a single line (no line breaks)
+- Run health check: `npm run health:prod`
 
 ### Still getting connection errors?
 - Verify `.env` file has correct Render URL
@@ -137,5 +165,51 @@ In Render dashboard:
 
 ### Need Help?
 - Check Render logs first
-- Review `DEPLOYMENT_GUIDE.md` for detailed info
+- Review automated deployment guide: [backend/docs/DEPLOYMENT.md](backend/docs/DEPLOYMENT.md)
+- Check troubleshooting guide: [backend/docs/TROUBLESHOOTING.md](backend/docs/TROUBLESHOOTING.md)
 - Render support: https://render.com/docs
+
+---
+
+## 🚀 Migrating to Automated Deployment
+
+The project now includes automated deployment scripts that simplify the deployment process:
+
+### Benefits of Automated Deployment
+
+- ✅ One-command deployment
+- ✅ Automatic validation before deployment
+- ✅ Environment-specific configurations (dev, staging, prod)
+- ✅ Health checks to verify deployments
+- ✅ Deployment history and rollback support
+- ✅ CI/CD integration with GitHub Actions
+
+### Migration Steps
+
+1. **Install dependencies** (if not already done)
+   ```bash
+   cd backend
+   npm install
+   ```
+
+2. **Prepare credentials**
+   ```bash
+   npm run prepare-credentials
+   ```
+
+3. **Validate setup**
+   ```bash
+   npm run deploy:dev -- --validate-only
+   ```
+
+4. **Deploy using automation**
+   ```bash
+   npm run deploy:dev
+   ```
+
+5. **Set up CI/CD** (optional)
+   ```bash
+   npm run generate-cicd:github
+   ```
+
+For complete migration guide, see [backend/docs/DEPLOYMENT.md](backend/docs/DEPLOYMENT.md)

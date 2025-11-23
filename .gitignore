@@ -19,6 +19,14 @@
 .env.test.local
 .env.production.local
 
+# Deployment configuration (backend)
+backend/config/deployment-config.json
+backend/config/deployment-history.json
+backend/config/.env.development
+backend/config/.env.staging
+backend/config/.env.production
+backend/firebase-credentials-for-render.txt
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
