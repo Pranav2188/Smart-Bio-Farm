@@ -57,11 +57,16 @@ service cloud.firestore {
     // Farmers can read/write their own animals
     // Veterinarians can read all animals
     match /animals/{animalId} {
+      // Allow all authenticated users to read (vets need to see all animals)
       allow read: if isAuthenticated();
+      // Allow farmers to create their own animals
       allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+      // Allow owners to update their animals, or vets to update any animal
       allow update: if isAuthenticated() && 
         (resource.data.ownerId == request.auth.uid || 
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'veterinarian');
+         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'veterinarian'));
+      // Only owners can delete their animals
       allow delete: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
     }
     
