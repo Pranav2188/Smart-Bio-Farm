@@ -15,16 +15,25 @@ console.log('\n' + colors.cyan + '🔍 Validating startup requirements...' + col
 
 let hasErrors = false;
 
-// Check 1: Validate serviceAccountKey.json exists
+// Check 1: Validate Firebase credentials (file or environment variable)
 const serviceAccountPath = path.join(__dirname, 'serviceAccountKey.json');
-if (fs.existsSync(serviceAccountPath)) {
+const hasServiceAccountFile = fs.existsSync(serviceAccountPath);
+const hasServiceAccountEnv = !!process.env.FIREBASE_SERVICE_ACCOUNT;
+
+if (hasServiceAccountFile) {
   console.log(colors.green + '✅ serviceAccountKey.json found' + colors.reset);
+} else if (hasServiceAccountEnv) {
+  console.log(colors.green + '✅ FIREBASE_SERVICE_ACCOUNT environment variable found' + colors.reset);
 } else {
-  console.error(colors.red + '❌ serviceAccountKey.json is missing!' + colors.reset);
+  console.error(colors.red + '❌ Firebase credentials missing!' + colors.reset);
   console.error(colors.yellow + '\n📋 To fix this:' + colors.reset);
-  console.error('  1. Go to Firebase Console > Project Settings > Service Accounts');
-  console.error('  2. Click "Generate New Private Key"');
-  console.error('  3. Save the file as serviceAccountKey.json in the backend folder\n');
+  console.error('  Option 1 - Local development:');
+  console.error('    1. Go to Firebase Console > Project Settings > Service Accounts');
+  console.error('    2. Click "Generate New Private Key"');
+  console.error('    3. Save the file as serviceAccountKey.json in the backend folder');
+  console.error('  Option 2 - Production (Render/Cloud):');
+  console.error('    1. Set FIREBASE_SERVICE_ACCOUNT environment variable');
+  console.error('    2. Value should be the entire JSON content as a single line\n');
   hasErrors = true;
 }
 
