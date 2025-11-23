@@ -463,30 +463,30 @@ export default function FarmerDashboard() {
     <div className="min-h-screen bg-gray-50">
       {/* Navbar */}
       <nav className="bg-white shadow-md">
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
-          <div className="flex items-center gap-3">
-            <div className="bg-green-600 p-2 rounded-lg">
-              <Sprout className="w-6 h-6 text-white" />
+        <div className="max-w-7xl mx-auto px-4 md:px-6 flex items-center justify-between h-16">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="bg-green-600 p-1.5 md:p-2 rounded-lg">
+              <Sprout className="w-5 h-5 md:w-6 md:h-6 text-white" />
             </div>
-            <span className="text-xl font-bold text-gray-800">Smart Bio Farm</span>
+            <span className="text-lg md:text-xl font-bold text-gray-800">Smart Bio Farm</span>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
             <LanguageSwitcher />
             
             <div className="relative">
             <button
               onClick={() => setShowProfileMenu(!showProfileMenu)}
-              className="flex items-center gap-2 bg-green-100 hover:bg-green-200 px-4 py-2 rounded-lg transition"
+              className="flex items-center gap-2 bg-green-100 hover:bg-green-200 px-3 md:px-4 py-2 rounded-lg transition"
             >
-              <User className="w-5 h-5 text-green-700" />
+              <User className="w-5 h-5 md:w-6 md:h-6 text-green-700" />
               <span className="text-green-700 font-semibold">
                 {role.toUpperCase()}
               </span>
             </button>
 
             {showProfileMenu && (
-              <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl p-3">
+              <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl p-3 z-50">
                 <p className="font-medium text-gray-800 mb-2">
                   {role.toUpperCase()} USER
                 </p>
@@ -510,10 +510,10 @@ export default function FarmerDashboard() {
       </nav>
 
       {/* Main Page Container */}
-      <div className="max-w-7xl mx-auto px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-6 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
 
         {/* Live Weather - Temperature + Humidity */}
-        <div className="bg-gradient-to-r from-orange-500 via-purple-500 to-blue-500 rounded-xl p-6 text-white shadow-lg col-span-2">
+        <div className="bg-gradient-to-r from-orange-500 via-purple-500 to-blue-500 rounded-xl p-4 md:p-6 text-white shadow-lg col-span-1 md:col-span-2">
           {weatherLoading ? (
             <div className="flex justify-center items-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
@@ -526,24 +526,24 @@ export default function FarmerDashboard() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <p className="text-sm font-semibold flex items-center gap-2">
-                    <Thermometer className="w-6 h-6" /> {t("liveTemperature")}
+                    <Thermometer className="w-5 h-5 md:w-6 md:h-6" /> {t("liveTemperature")}
                   </p>
-                  <p className="text-4xl font-bold">{weather.temperature}°C</p>
+                  <p className="text-3xl md:text-4xl font-bold">{weather.temperature}°C</p>
                   <p className="text-sm opacity-80 mt-1">{t("feelsLike")} {weather.feelsLike}°C</p>
                 </div>
                 <div>
                   <p className="text-sm font-semibold flex items-center gap-2">
-                    <Droplets className="w-6 h-6" /> {t("liveHumidity")}
+                    <Droplets className="w-5 h-5 md:w-6 md:h-6" /> {t("liveHumidity")}
                   </p>
-                  <p className="text-4xl font-bold">{weather.humidity}%</p>
+                  <p className="text-3xl md:text-4xl font-bold">{weather.humidity}%</p>
                   <p className="text-sm opacity-80 mt-1">{t("wind")}: {weather.windSpeed} m/s</p>
                 </div>
               </div>
               <div className="mt-4 pt-4 border-t border-white border-opacity-30">
-                <p className="text-sm opacity-90">
+                <p className="text-sm opacity-90 break-words">
                   📍 {weather.city} • {weather.description.toUpperCase()}
                 </p>
                 <p className="text-xs opacity-75 mt-1">
@@ -555,18 +555,18 @@ export default function FarmerDashboard() {
         </div>
 
         {/* Animal Overview */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-bold text-gray-800">{t("animalOverview")}</h3>
+        <div className="bg-white rounded-xl shadow-lg p-4 md:p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6 gap-3">
+            <h3 className="text-lg md:text-xl font-bold text-gray-800">{t("animalOverview")}</h3>
             <button
               onClick={() => setShowAnimalModal(true)}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold"
+              className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold"
             >
               🐾 {t("manageAnimals")}
             </button>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2 md:gap-3">
             <StatBox icon={Package} value={animalStats.totalAnimals} label={t("totalAnimals")} color="green" />
             <StatBox icon={TrendingUp} value={animalStats.activeCategories} label={t("activeCategories")} color="blue" />
             <StatBox icon={CheckCircle} value={animalStats.todayUpdates} label={t("todayUpdates")} color="purple" />
@@ -575,25 +575,25 @@ export default function FarmerDashboard() {
         </div>
 
         {/* Report Condition & My Requests */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">
+        <div className="bg-white rounded-xl shadow-lg p-4 md:p-6">
+          <h3 className="text-lg md:text-xl font-bold text-gray-800 mb-3 md:mb-4">
             {t("veterinaryServices")}
           </h3>
-          <p className="text-gray-600 mb-4">
+          <p className="text-sm md:text-base text-gray-600 mb-3 md:mb-4">
             {t("reportHealthIssues")}
           </p>
           
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
             <button
               onClick={() => setShowConditionModal(true)}
-              className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+              className="w-full bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors min-h-[44px]"
             >
               {t("reportCondition")}
             </button>
             
             <button
               onClick={() => navigate("/farmer/requests")}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors min-h-[44px]"
             >
               {t("myVetRequests")}
             </button>
@@ -601,13 +601,13 @@ export default function FarmerDashboard() {
         </div>
 
         {/* Alerts */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex justify-between items-center mb-4 gap-4">
-            <h3 className="text-xl font-bold text-gray-800">{t("liveAlerts")}</h3>
+        <div className="bg-white rounded-xl shadow-lg p-4 md:p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+            <h3 className="text-lg md:text-xl font-bold text-gray-800">{t("liveAlerts")}</h3>
             
             <button
               onClick={() => setShowAddReportModal(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 whitespace-nowrap"
+              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-2"
             >
               <Plus className="w-4 h-4" />
               {t("addReport")}
@@ -625,7 +625,7 @@ export default function FarmerDashboard() {
               <p className="text-sm mt-1">{alertsError}</p>
             </div>
           ) : (
-            <div className="space-y-3 max-h-64 overflow-y-auto">
+            <div className="space-y-2 md:space-y-3 max-h-64 overflow-y-auto">
               {firestoreAlerts.length === 0 ? (
                 <p className="text-center text-gray-500 py-4">{t("noAlertsYet")}</p>
               ) : (
@@ -642,7 +642,7 @@ export default function FarmerDashboard() {
                   >
                     <div className="flex items-start gap-2">
                       <AlertTriangle
-                        className={`w-5 h-5 ${
+                        className={`w-5 h-5 flex-shrink-0 ${
                           alert.type === "warning"
                             ? "text-yellow-600"
                             : alert.type === "alert"
@@ -650,8 +650,8 @@ export default function FarmerDashboard() {
                             : "text-blue-600"
                         }`}
                       />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-800 mb-2">{alert.message}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-800 mb-2 break-words">{alert.message}</p>
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-xs text-gray-500">{formatRelativeTime(alert.timestamp, t)}</span>
                           {alert.createdByName && (
@@ -678,11 +678,11 @@ export default function FarmerDashboard() {
         </div>
 
         {/* Analytics Dashboard */}
-        <div className="max-w-7xl mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-6 grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
           {/* Animal Quantity Stats */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">{t("animalQuantityStats")}</h3>
-            <ResponsiveContainer width="100%" height={300}>
+          <div className="bg-white rounded-xl shadow-lg p-4 md:p-6">
+            <h3 className="text-lg md:text-xl font-bold text-gray-800 mb-3 md:mb-4">{t("animalQuantityStats")}</h3>
+            <ResponsiveContainer width="100%" height={250}>
               <BarChart data={animalQuantityData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
@@ -696,9 +696,9 @@ export default function FarmerDashboard() {
           </div>
 
           {/* Price Trends */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">{t("priceTrends")}</h3>
-            <ResponsiveContainer width="100%" height={300}>
+          <div className="bg-white rounded-xl shadow-lg p-4 md:p-6">
+            <h3 className="text-lg md:text-xl font-bold text-gray-800 mb-3 md:mb-4">{t("priceTrends")}</h3>
+            <ResponsiveContainer width="100%" height={250}>
               <LineChart data={priceTrendData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
@@ -714,20 +714,20 @@ export default function FarmerDashboard() {
       {/* Animal Type Selection Modal */}
       {showAnimalModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4">
-          <div className="bg-white p-6 rounded-xl shadow-2xl w-80">
-            <h3 className="text-xl font-bold mb-4">Choose Animal</h3>
+          <div className="bg-white p-4 md:p-6 rounded-xl shadow-2xl w-full max-w-sm">
+            <h3 className="text-lg md:text-xl font-bold mb-4">Choose Animal</h3>
 
-            <button className="w-full bg-pink-100 py-3 rounded-lg text-pink-900 font-semibold mb-3"
+            <button className="w-full bg-pink-100 py-3 rounded-lg text-pink-900 font-semibold mb-3 min-h-[44px]"
               onClick={() => { setSelectedAnimal("pigs"); setShowAnimalModal(false); }}>
               🐷 Manage Pigs
             </button>
 
-            <button className="w-full bg-yellow-100 py-3 rounded-lg text-yellow-800 font-semibold"
+            <button className="w-full bg-yellow-100 py-3 rounded-lg text-yellow-800 font-semibold min-h-[44px]"
               onClick={() => { setSelectedAnimal("chickens"); setShowAnimalModal(false); }}>
               🐔 Manage Chickens
             </button>
 
-            <button onClick={() => setShowAnimalModal(false)} className="mt-4 text-gray-700 underline">
+            <button onClick={() => setShowAnimalModal(false)} className="mt-4 text-gray-700 underline min-h-[44px]">
               Cancel
             </button>
           </div>
@@ -736,45 +736,45 @@ export default function FarmerDashboard() {
 
       {/* Database Entry Table Modal */}
       {selectedAnimal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center p-4 overflow-auto">
-          <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-5xl">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center p-2 md:p-4 overflow-auto">
+          <div className="bg-white rounded-xl shadow-2xl p-4 md:p-6 w-full max-w-5xl my-auto max-h-screen overflow-y-auto">
             <div className="flex justify-between mb-4">
-              <h2 className="text-xl font-bold capitalize">{selectedAnimal} Records</h2>
+              <h2 className="text-lg md:text-xl font-bold capitalize">{selectedAnimal} Records</h2>
               <button onClick={() => {
                 setSelectedAnimal(null);
                 setOperationError(null);
-              }}>
+              }} className="min-h-[44px] min-w-[44px] flex items-center justify-center">
                 <X className="w-6 h-6 text-gray-800" />
               </button>
             </div>
 
             {/* Error Message */}
             {(operationError || dataError) && (
-              <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                <p className="font-semibold">Error:</p>
-                <p className="text-sm">{operationError || dataError}</p>
+              <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-3 md:px-4 py-2 md:py-3 rounded-lg">
+                <p className="font-semibold text-sm md:text-base">Error:</p>
+                <p className="text-xs md:text-sm">{operationError || dataError}</p>
               </div>
             )}
 
             <button onClick={() => setShowAddForm(!showAddForm)}
-              className="mb-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold">
+              className="mb-4 w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold min-h-[44px]">
               + Add New Entry
             </button>
 
             {showAddForm && (
-              <div className="mb-4 grid grid-cols-5 gap-2 border p-3 rounded-lg bg-gray-50">
-                <input type="date" className="input" value={newEntry.date}
+              <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2 border p-3 md:p-4 rounded-lg bg-gray-50">
+                <input type="date" className="input w-full min-h-[44px]" value={newEntry.date}
                   onChange={e => setNewEntry({ ...newEntry, date: e.target.value })}/>
-                <input type="text" placeholder="Category" className="input" value={newEntry.category}
+                <input type="text" placeholder="Category" className="input w-full min-h-[44px]" value={newEntry.category}
                   onChange={e => setNewEntry({ ...newEntry, category: e.target.value })}/>
-                <select className="input" value={newEntry.gender} onChange={e => setNewEntry({ ...newEntry, gender: e.target.value })}>
+                <select className="input w-full min-h-[44px]" value={newEntry.gender} onChange={e => setNewEntry({ ...newEntry, gender: e.target.value })}>
                   <option value="">Gender</option><option>Male</option><option>Female</option><option>Mixed</option>
                 </select>
-                <input type="number" placeholder="Qty" className="input" value={newEntry.quantity}
+                <input type="number" placeholder="Qty" className="input w-full min-h-[44px]" value={newEntry.quantity}
                   onChange={e => setNewEntry({ ...newEntry, quantity: e.target.value })}/>
-                <input type="number" placeholder="Price ₹" className="input" value={newEntry.price}
+                <input type="number" placeholder="Price ₹" className="input w-full min-h-[44px]" value={newEntry.price}
                   onChange={e => setNewEntry({ ...newEntry, price: e.target.value })}/>
-                <button onClick={handleAddEntry} className="bg-green-600 text-white px-3 py-1 rounded">
+                <button onClick={handleAddEntry} className="bg-green-600 text-white px-3 py-2 rounded min-h-[44px] w-full sm:col-span-2 md:col-span-1">
                   Save
                 </button>
               </div>
@@ -787,12 +787,12 @@ export default function FarmerDashboard() {
                 <p className="ml-4 text-gray-600">Loading livestock data...</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border">
-                  <thead className="bg-gray-200 text-sm font-bold">
+              <div className="overflow-x-auto -mx-4 md:mx-0">
+                <table className="w-full text-left border text-sm md:text-base">
+                  <thead className="bg-gray-200 text-xs md:text-sm font-bold">
                     <tr>
-                      <th className="p-2">Date</th><th className="p-2">Category</th><th className="p-2">Gender</th>
-                      <th className="p-2">Qty</th><th className="p-2">Price (₹)</th><th className="p-2 text-center">Actions</th>
+                      <th className="p-2 md:p-3">Date</th><th className="p-2 md:p-3">Category</th><th className="p-2 md:p-3">Gender</th>
+                      <th className="p-2 md:p-3">Qty</th><th className="p-2 md:p-3">Price (₹)</th><th className="p-2 md:p-3 text-center">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -805,14 +805,14 @@ export default function FarmerDashboard() {
                     ) : (
                       currentData.map(row => (
                         <tr key={row.id} className="border-b hover:bg-gray-50">
-                          <td className="p-2">{row.date}</td>
-                          <td className="p-2">{row.category}</td>
-                          <td className="p-2">{row.gender}</td>
-                          <td className="p-2">{row.quantity}</td>
-                          <td className="p-2">₹{row.price.toLocaleString()}</td>
-                          <td className="p-2 text-center">
+                          <td className="p-2 md:p-3">{row.date}</td>
+                          <td className="p-2 md:p-3">{row.category}</td>
+                          <td className="p-2 md:p-3">{row.gender}</td>
+                          <td className="p-2 md:p-3">{row.quantity}</td>
+                          <td className="p-2 md:p-3">₹{row.price.toLocaleString()}</td>
+                          <td className="p-2 md:p-3 text-center">
                             <button onClick={() => handleDeleteEntry(row.id)}
-                              className="text-red-600 hover:text-red-800 font-bold">
+                              className="text-red-600 hover:text-red-800 font-bold min-h-[44px] px-2">
                               Delete
                             </button>
                           </td>
@@ -831,14 +831,14 @@ export default function FarmerDashboard() {
       {/* Add Report Modal */}
       {showAddReportModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full">
+          <div className="bg-white rounded-xl shadow-2xl p-4 md:p-6 w-full max-w-md">
             
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-gray-800">Add New Report</h3>
+              <h3 className="text-lg md:text-xl font-bold text-gray-800">Add New Report</h3>
               <button onClick={() => {
                 setShowAddReportModal(false);
                 setAddAlertError(null);
-              }}>
+              }} className="min-h-[44px] min-w-[44px] flex items-center justify-center">
                 <X className="w-6 h-6 text-gray-600" />
               </button>
             </div>
@@ -851,7 +851,7 @@ export default function FarmerDashboard() {
 
             <div className="space-y-4">
               <select
-                className="w-full px-4 py-2 border rounded-lg"
+                className="w-full px-4 py-2 border rounded-lg min-h-[44px]"
                 value={newReport.type}
                 onChange={(e) => setNewReport({ ...newReport, type: e.target.value })}
               >
@@ -862,7 +862,7 @@ export default function FarmerDashboard() {
 
               <textarea
                 rows="3"
-                className="w-full px-4 py-2 border rounded-lg"
+                className="w-full px-4 py-2 border rounded-lg min-h-[44px]"
                 placeholder="Enter report message..."
                 value={newReport.message}
                 onChange={(e) => setNewReport({ ...newReport, message: e.target.value })}
@@ -870,7 +870,7 @@ export default function FarmerDashboard() {
 
               <button
                 onClick={handleAddReport}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition min-h-[44px]"
               >
                 Submit Report
               </button>
@@ -882,11 +882,11 @@ export default function FarmerDashboard() {
       {/* Report Condition Modal */}
       {showConditionModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full">
+          <div className="bg-white rounded-xl shadow-2xl p-4 md:p-6 w-full max-w-md">
             
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-gray-800">Report Animal Condition</h3>
-              <button onClick={() => setShowConditionModal(false)}>
+              <h3 className="text-lg md:text-xl font-bold text-gray-800">Report Animal Condition</h3>
+              <button onClick={() => setShowConditionModal(false)} className="min-h-[44px] min-w-[44px] flex items-center justify-center">
                 <X className="w-6 h-6 text-gray-500 hover:text-gray-700" />
               </button>
             </div>
@@ -900,7 +900,7 @@ export default function FarmerDashboard() {
                 <select
                   value={reportAnimalType}
                   onChange={(e) => setReportAnimalType(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg min-h-[44px]"
                 >
                   <option value="">Select</option>
                   <option value="pigs">Pigs</option>
@@ -917,7 +917,7 @@ export default function FarmerDashboard() {
                   type="text"
                   value={reportCategory}
                   onChange={(e) => setReportCategory(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg min-h-[44px]"
                   placeholder="Boar, Sow, Broiler, etc"
                 />
               </div>
@@ -931,7 +931,7 @@ export default function FarmerDashboard() {
                   value={reportMessage}
                   onChange={(e) => setReportMessage(e.target.value)}
                   rows="4"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg min-h-[44px]"
                   placeholder="Explain the problem or symptoms..."
                 ></textarea>
               </div>
@@ -939,7 +939,7 @@ export default function FarmerDashboard() {
               {/* Submit */}
               <button
                 onClick={handleSendCondition}
-                className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-semibold"
+                className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-semibold min-h-[44px]"
               >
                 Send to Veterinarian
               </button>
@@ -975,9 +975,9 @@ function formatRelativeTime(timestamp, t) {
 // Small reusable UI Components
 function StatBox({ icon: Icon, value, label, color }) {
   return (
-    <div className={`bg-${color}-50 border border-${color}-200 rounded-lg p-3`}>
-      <Icon className={`w-6 h-6 text-${color}-600`} />
-      <p className="text-xl font-bold text-gray-800">{value}</p>
+    <div className={`bg-${color}-50 border border-${color}-200 rounded-lg p-2 md:p-3`}>
+      <Icon className={`w-5 h-5 md:w-6 md:h-6 text-${color}-600`} />
+      <p className="text-lg md:text-xl font-bold text-gray-800">{value}</p>
       <p className="text-xs text-gray-600">{label}</p>
     </div>
   );

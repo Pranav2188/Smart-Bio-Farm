@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Testing Tool - Smart Bio Farm</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f3f4f6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #16a34a;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #16a34a;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #15803d;
+        }
+
+        .btn-secondary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #2563eb;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .iframe-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .iframe-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .viewport-info {
+            font-size: 14px;
+            color: #6b7280;
+            font-weight: 600;
+        }
+
+        .iframe-wrapper {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s;
+            margin: 0 auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        iframe {
+            display: block;
+            border: none;
+            width: 100%;
+            height: 100%;
+        }
+
+        .test-results {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .test-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+
+        .test-section h3 {
+            color: #1f2937;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .test-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .test-item.pass {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .test-item.fail {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .test-item.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .icon {
+            font-size: 18px;
+        }
+
+        .custom-size {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .custom-size input {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            width: 100px;
+            font-size: 14px;
+        }
+
+        .custom-size label {
+            font-size: 14px;
+            color: #4b5563;
+            font-weight: 500;
+        }
+
+        .orientation-toggle {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fcd34d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📱 Mobile Responsive Testing Tool</h1>
+            <p class="description">Test the Smart Bio Farm dashboard at different breakpoints and verify responsive behavior</p>
+        </div>
+
+        <div class="controls">
+            <h2 style="margin-bottom: 15px; font-size: 18px;">Viewport Controls</h2>
+            
+            <div class="alert alert-info">
+                <strong>Instructions:</strong> Click a preset button to test different device sizes, or enter custom dimensions below. The dashboard will load in the iframe below.
+            </div>
+
+            <h3 style="margin-bottom: 10px; font-size: 14px; color: #6b7280;">Preset Devices</h3>
+            <div class="button-group">
+                <button class="btn-danger" onclick="setViewport(320, 568)">📱 iPhone SE (320px)</button>
+                <button class="btn-warning" onclick="setViewport(375, 667)">📱 iPhone 12/13 (375px)</button>
+                <button class="btn-secondary" onclick="setViewport(414, 896)">📱 Large Phone (414px)</button>
+                <button class="btn-primary" onclick="setViewport(768, 1024)">📱 Tablet (768px)</button>
+                <button class="btn-primary" onclick="setViewport(1024, 768)">💻 Desktop (1024px)</button>
+                <button class="btn-primary" onclick="setViewport(1440, 900)">🖥️ Large Desktop (1440px)</button>
+            </div>
+
+            <div class="custom-size">
+                <label>Custom Size:</label>
+                <input type="number" id="customWidth" placeholder="Width" value="375">
+                <label>×</label>
+                <input type="number" id="customHeight" placeholder="Height" value="667">
+                <button class="btn-secondary" onclick="setCustomViewport()">Apply</button>
+            </div>
+
+            <div class="orientation-toggle">
+                <button class="btn-secondary" onclick="rotateViewport()">🔄 Rotate Device</button>
+                <button class="btn-secondary" onclick="runTests()">✅ Run Automated Tests</button>
+                <button class="btn-warning" onclick="resetTests()">🔄 Reset Tests</button>
+            </div>
+        </div>
+
+        <div class="iframe-container">
+            <div class="iframe-header">
+                <div class="viewport-info">
+                    <span id="viewportDisplay">Viewport: 375px × 667px</span>
+                    <span style="margin-left: 15px; color: #16a34a;" id="breakpointDisplay">Breakpoint: Mobile</span>
+                </div>
+                <div>
+                    <button class="btn-secondary" onclick="reloadIframe()">🔄 Reload</button>
+                </div>
+            </div>
+            <div class="iframe-wrapper" id="iframeWrapper">
+                <iframe id="testFrame" src="about:blank"></iframe>
+            </div>
+        </div>
+
+        <div class="test-results">
+            <h2 style="margin-bottom: 15px; font-size: 18px;">Automated Test Results</h2>
+            
+            <div class="alert alert-warning" id="testAlert">
+                Click "Run Automated Tests" to check responsive behavior. Note: Some tests require manual verification.
+            </div>
+
+            <div class="stats" id="statsContainer" style="display: none;">
+                <div class="stat-card">
+                    <div class="stat-value" id="passCount">0</div>
+                    <div class="stat-label">Tests Passed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="failCount">0</div>
+                    <div class="stat-label">Tests Failed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="pendingCount">0</div>
+                    <div class="stat-label">Manual Tests</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalCount">0</div>
+                    <div class="stat-label">Total Tests</div>
+                </div>
+            </div>
+
+            <div id="testResultsContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentWidth = 375;
+        let currentHeight = 667;
+
+        function setViewport(width, height) {
+            currentWidth = width;
+            currentHeight = height;
+            updateViewport();
+        }
+
+        function setCustomViewport() {
+            const width = parseInt(document.getElementById('customWidth').value);
+            const height = parseInt(document.getElementById('customHeight').value);
+            if (width && height) {
+                setViewport(width, height);
+            }
+        }
+
+        function rotateViewport() {
+            setViewport(currentHeight, currentWidth);
+        }
+
+        function updateViewport() {
+            const wrapper = document.getElementById('iframeWrapper');
+            const frame = document.getElementById('testFrame');
+            
+            wrapper.style.width = currentWidth + 'px';
+            wrapper.style.height = currentHeight + 'px';
+            
+            document.getElementById('viewportDisplay').textContent = `Viewport: ${currentWidth}px × ${currentHeight}px`;
+            
+            // Determine breakpoint
+            let breakpoint = 'Mobile';
+            if (currentWidth >= 1024) breakpoint = 'Large Desktop';
+            else if (currentWidth >= 768) breakpoint = 'Tablet / Desktop';
+            else if (currentWidth >= 640) breakpoint = 'Small Tablet';
+            else breakpoint = 'Mobile';
+            
+            document.getElementById('breakpointDisplay').textContent = `Breakpoint: ${breakpoint}`;
+            
+            // Load the dashboard if not already loaded
+            if (frame.src === 'about:blank' || frame.src === '') {
+                loadDashboard();
+            }
+        }
+
+        function loadDashboard() {
+            const frame = document.getElementById('testFrame');
+            // Update this URL to point to your local development server
+            frame.src = 'http://localhost:3000/farmer-dashboard?role=farmer';
+        }
+
+        function reloadIframe() {
+            const frame = document.getElementById('testFrame');
+            frame.src = frame.src;
+        }
+
+        function runTests() {
+            const tests = [
+                {
+                    name: 'Viewport Meta Tag',
+                    category: 'Configuration',
+                    test: () => {
+                        // This would need to check the actual HTML
+                        return { status: 'pending', message: 'Check public/index.html manually' };
+                    }
+                },
+                {
+                    name: 'No Horizontal Scrolling',
+                    category: 'Layout',
+                    test: () => {
+                        try {
+                            const frame = document.getElementById('testFrame');
+                            const doc = frame.contentDocument || frame.contentWindow.document;
+                            const hasHorizontalScroll = doc.documentElement.scrollWidth > doc.documentElement.clientWidth;
+                            return {
+                                status: hasHorizontalScroll ? 'fail' : 'pass',
+                                message: hasHorizontalScroll ? 'Horizontal scrolling detected' : 'No horizontal scrolling'
+                            };
+                        } catch (e) {
+                            return { status: 'pending', message: 'Cannot access iframe (CORS)' };
+                        }
+                    }
+                },
+                {
+                    name: 'Responsive Grid Layout',
+                    category: 'Layout',
+                    test: () => {
+                        if (currentWidth < 768) {
+                            return { status: 'pending', message: 'Verify single-column layout manually' };
+                        } else {
+                            return { status: 'pending', message: 'Verify 2-column layout manually' };
+                        }
+                    }
+                },
+                {
+                    name: 'Touch Target Size (44×44px)',
+                    category: 'Accessibility',
+                    test: () => {
+                        return { status: 'pending', message: 'Manually verify all buttons meet 44×44px minimum' };
+                    }
+                },
+                {
+                    name: 'Weather Widget Responsive',
+                    category: 'Components',
+                    test: () => {
+                        if (currentWidth < 640) {
+                            return { status: 'pending', message: 'Verify single-column weather layout' };
+                        } else {
+                            return { status: 'pending', message: 'Verify 2-column weather layout' };
+                        }
+                    }
+                },
+                {
+                    name: 'Modal Fits Viewport',
+                    category: 'Modals',
+                    test: () => {
+                        return { status: 'pending', message: 'Open modals and verify they fit within viewport' };
+                    }
+                },
+                {
+                    name: 'Form Inputs Accessible',
+                    category: 'Forms',
+                    test: () => {
+                        return { status: 'pending', message: 'Test form inputs with mobile keyboard' };
+                    }
+                },
+                {
+                    name: 'Charts Render Correctly',
+                    category: 'Charts',
+                    test: () => {
+                        return { status: 'pending', message: 'Verify charts are visible and interactive' };
+                    }
+                },
+                {
+                    name: 'Navigation Bar Responsive',
+                    category: 'Components',
+                    test: () => {
+                        return { status: 'pending', message: 'Verify navbar elements are properly sized' };
+                    }
+                },
+                {
+                    name: 'Buttons Stack on Mobile',
+                    category: 'Components',
+                    test: () => {
+                        if (currentWidth < 640) {
+                            return { status: 'pending', message: 'Verify veterinary buttons stack vertically' };
+                        } else {
+                            return { status: 'pending', message: 'Verify veterinary buttons are horizontal' };
+                        }
+                    }
+                },
+                {
+                    name: 'Table Horizontal Scroll',
+                    category: 'Components',
+                    test: () => {
+                        return { status: 'pending', message: 'Open animal records and verify table scrolls horizontally' };
+                    }
+                },
+                {
+                    name: 'Text Readability',
+                    category: 'Accessibility',
+                    test: () => {
+                        return { status: 'pending', message: 'Verify all text is readable (min 16px body text)' };
+                    }
+                }
+            ];
+
+            displayTestResults(tests);
+        }
+
+        function displayTestResults(tests) {
+            const container = document.getElementById('testResultsContainer');
+            const statsContainer = document.getElementById('statsContainer');
+            const alert = document.getElementById('testAlert');
+            
+            statsContainer.style.display = 'grid';
+            alert.className = 'alert alert-info';
+            alert.textContent = 'Tests completed. Manual verification required for most tests.';
+            
+            // Group tests by category
+            const categories = {};
+            tests.forEach(test => {
+                const result = test.test();
+                if (!categories[test.category]) {
+                    categories[test.category] = [];
+                }
+                categories[test.category].push({ name: test.name, ...result });
+            });
+
+            // Count results
+            let passCount = 0, failCount = 0, pendingCount = 0;
+            tests.forEach(test => {
+                const result = test.test();
+                if (result.status === 'pass') passCount++;
+                else if (result.status === 'fail') failCount++;
+                else pendingCount++;
+            });
+
+            document.getElementById('passCount').textContent = passCount;
+            document.getElementById('failCount').textContent = failCount;
+            document.getElementById('pendingCount').textContent = pendingCount;
+            document.getElementById('totalCount').textContent = tests.length;
+
+            // Display results
+            container.innerHTML = '';
+            Object.keys(categories).forEach(category => {
+                const section = document.createElement('div');
+                section.className = 'test-section';
+                
+                const heading = document.createElement('h3');
+                heading.textContent = category;
+                section.appendChild(heading);
+
+                categories[category].forEach(result => {
+                    const item = document.createElement('div');
+                    item.className = `test-item ${result.status}`;
+                    
+                    const icon = result.status === 'pass' ? '✅' : 
+                                result.status === 'fail' ? '❌' : '⏳';
+                    
+                    item.innerHTML = `
+                        <span class="icon">${icon}</span>
+                        <div>
+                            <strong>${result.name}</strong>
+                            <div style="font-size: 12px; margin-top: 2px;">${result.message}</div>
+                        </div>
+                    `;
+                    section.appendChild(item);
+                });
+
+                container.appendChild(section);
+            });
+        }
+
+        function resetTests() {
+            document.getElementById('testResultsContainer').innerHTML = '';
+            document.getElementById('statsContainer').style.display = 'none';
+            document.getElementById('testAlert').className = 'alert alert-warning';
+            document.getElementById('testAlert').textContent = 'Click "Run Automated Tests" to check responsive behavior. Note: Some tests require manual verification.';
+        }
+
+        // Initialize with default viewport
+        updateViewport();
+    </script>
+</body>
+</html>
