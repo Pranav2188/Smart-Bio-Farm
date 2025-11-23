@@ -41,16 +41,28 @@ service cloud.firestore {
       allow write: if isAuthenticated(); // In production, restrict to admin/sensor role
     }
     
-    // Alerts collection (global alerts visible to all farmers)
+    // Alerts collection (global alerts and user-specific alerts)
     match /alerts/{docId} {
-      // All authenticated users can read all alerts (we filter by isGlobal in the query)
-      allow read: if isAuthenticated();
-      // Any authenticated user can create global alerts
-      allow create: if isAuthenticated() && request.resource.data.isGlobal == true;
+      // Users can read their own alerts or global alerts
+      allow read: if isAuthenticated() && 
+        (resource.data.userId == request.auth.uid || 
+         resource.data.isGlobal == true ||
+         !exists(/databases/$(database)/documents/alerts/$(docId)) // Allow reading during creation
+        );
+      // Any authenticated user can create alerts (global or user-specific)
+      allow create: if isAuthenticated() && 
+        (request.resource.data.isGlobal == true || // Global alerts
+         request.resource.data.userId != null);     // User-specific alerts
       // Creator or government can update alerts
-      allow update: if isAuthenticated() && (resource.data.createdBy == request.auth.uid || isGovernment());
+      allow update: if isAuthenticated() && 
+        (resource.data.createdBy == request.auth.uid || 
+         resource.data.userId == request.auth.uid ||
+         isGovernment());
       // Creator or government can delete alerts
-      allow delete: if isAuthenticated() && (resource.data.createdBy == request.auth.uid || isGovernment());
+      allow delete: if isAuthenticated() && 
+        (resource.data.createdBy == request.auth.uid || 
+         resource.data.userId == request.auth.uid ||
+         isGovernment());
     }
     
     // Shared Animals collection
