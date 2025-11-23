@@ -1,14 +1,10 @@
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../firebase";
 
-// Firebase Functions URL - automatically uses production or local emulator
-const FIREBASE_PROJECT_ID = "smartbiofarm";
-const FIREBASE_REGION = "us-central1"; // Default region for Firebase Functions
-
-// Use Firebase Functions in production, fallback to localhost in development
+// Backend URL - uses Render in production, localhost in development
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 
   (process.env.NODE_ENV === 'production' 
-    ? `https://${FIREBASE_REGION}-${FIREBASE_PROJECT_ID}.cloudfunctions.net`
+    ? 'https://trip-defender-backend.onrender.com'
     : 'http://localhost:5000');
 
 /**
@@ -115,14 +111,13 @@ export const notifyFarmersNewAlert = async (alertData) => {
  * @returns {Promise<Object>} - Notification result
  */
 export const notifyVetsNewRequest = async (requestData) => {
-  const { farmerName, animalType, symptoms, urgency } = requestData;
+  const { requestId, animalType, category, farmerName, symptoms, urgency } = requestData;
   
   // Try backend first
   const backendResult = await sendViaBackend('/notify-vets-new-request', {
-    farmerName,
-    animalType,
-    symptoms,
-    urgency
+    requestId: requestId || 'unknown',
+    animalType: animalType || 'animal',
+    category: category || symptoms || urgency || 'treatment needed'
   });
   
   if (backendResult.success) {
