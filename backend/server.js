@@ -144,9 +144,19 @@ app.post("/send-to-vets", async (req, res) => {
 
 // 🔥 Notify all vets about new request
 app.post("/notify-vets-new-request", async (req, res) => {
-  const { requestId, animalType, category } = req.body;
-
   try {
+    const { requestId, animalType, category } = req.body;
+
+    // Validate required fields
+    if (!requestId || !animalType) {
+      console.log("❌ Missing required fields:", { requestId, animalType, category });
+      return res.status(400).send({ 
+        error: "Missing required fields: requestId and animalType are required" 
+      });
+    }
+
+    console.log("📨 Notifying vets about new request:", { requestId, animalType, category });
+
     // Fetch all veterinarians
     const vetsSnapshot = await db.collection("users")
       .where("role", "==", "veterinarian")
@@ -160,18 +170,26 @@ app.post("/notify-vets-new-request", async (req, res) => {
       }
     });
 
+    console.log(`Found ${tokens.length} veterinarian tokens`);
+
     if (tokens.length === 0) {
-      return res.send({ success: true, message: "No veterinarian tokens found" });
+      return res.send({ 
+        success: true, 
+        message: "No veterinarian tokens found",
+        successCount: 0,
+        failureCount: 0
+      });
     }
 
     const message = {
       notification: {
         title: "New Animal Treatment Request",
-        body: `A farmer needs help with ${animalType} - ${category}`,
+        body: `A farmer needs help with ${animalType}${category ? ' - ' + category : ''}`,
       },
       data: {
-        requestId: requestId,
-        animalType: animalType,
+        requestId: String(requestId), // Ensure it's a string
+        animalType: String(animalType),
+        category: category ? String(category) : '',
         url: "/vet-requests"
       }
     };
@@ -179,22 +197,31 @@ app.post("/notify-vets-new-request", async (req, res) => {
     // Send to each token individually
     const promises = tokens.map(token => 
       admin.messaging().send({ ...message, token })
+        .catch(err => {
+          console.error(`Failed to send to token ${token.substring(0, 20)}...`, err.message);
+          return Promise.reject(err);
+        })
     );
 
     const results = await Promise.allSettled(promises);
     const successCount = results.filter(r => r.status === 'fulfilled').length;
     const failureCount = results.filter(r => r.status === 'rejected').length;
     
-    console.log(`Notified ${successCount} veterinarians (${failureCount} failed)`);
+    console.log(`✅ Notified ${successCount} veterinarians (${failureCount} failed)`);
     
     res.send({ 
       success: true, 
       successCount: successCount,
-      failureCount: failureCount 
+      failureCount: failureCount,
+      message: `Notified ${successCount} veterinarians`
     });
   } catch (error) {
-    console.error("Error notifying vets:", error);
-    res.status(500).send({ error: error.message });
+    console.error("❌ Error notifying vets:", error);
+    console.error("Error stack:", error.stack);
+    res.status(500).send({ 
+      error: error.message,
+      details: "Failed to notify veterinarians. Check server logs for details."
+    });
   }
 });
 
