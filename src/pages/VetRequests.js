@@ -93,11 +93,9 @@ export default function VetRequests() {
       // 3. Notify farmer
       try {
         const result = await notifyFarmerTreatment({
-          farmerName: selectedRequest.farmerName || 'Farmer',
-          vetName: auth.currentUser?.displayName || auth.currentUser?.email || 'Veterinarian',
+          farmerId: selectedRequest.farmerId,
           animalType: selectedRequest.animalType,
-          diagnosis: treatment.diagnosis,
-          treatment: treatment.medicines
+          requestId: selectedRequest.id
         });
         
         if (result.success) {
