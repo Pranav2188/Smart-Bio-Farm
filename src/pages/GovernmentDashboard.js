@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   Building2, Users, AlertTriangle, TrendingUp, Activity,
-  LogOut, Bell, FileText, BarChart3, Cloud, Plus, X, Send
+  LogOut, Bell, FileText, BarChart3, Cloud, Plus, X, Send, Menu, User
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -21,6 +21,8 @@ export default function GovernmentDashboard() {
 
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(true);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   
   // Statistics
   const [stats, setStats] = useState({
@@ -186,65 +188,131 @@ export default function GovernmentDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600 font-semibold">Loading Dashboard...</p>
+          <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-4 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600 font-semibold text-sm sm:text-base">Loading Dashboard...</p>
         </div>
       </div>
     );
   }
 
+  const tabs = [
+    { id: "overview", label: "Overview", icon: BarChart3 },
+    { id: "farmers", label: "Farmers", icon: Users },
+    { id: "animals", label: "Livestock", icon: Activity },
+    { id: "requests", label: "Requests", icon: FileText },
+    { id: "alerts", label: "Alerts", icon: Bell },
+    { id: "weather", label: "Weather", icon: Cloud }
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Header */}
-      <div className="bg-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="bg-blue-600 p-2 rounded-lg">
-                <Building2 className="w-8 h-8 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-800">Government Services Dashboard</h1>
-                <p className="text-sm text-gray-600">
-                  {userProfile?.department || "Agriculture Department"} • {userProfile?.region || "National"}
-                </p>
-              </div>
+      {/* Mobile-Responsive Navbar */}
+      <nav className="bg-white shadow-md sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 flex items-center justify-between h-16">
+          <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
+            <button
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              className="lg:hidden p-2 hover:bg-gray-100 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center"
+            >
+              <Menu className="w-6 h-6 text-gray-700" />
+            </button>
+            <div className="bg-blue-600 p-1.5 md:p-2 rounded-lg flex-shrink-0">
+              <Building2 className="w-5 h-5 md:w-6 md:h-6 text-white" />
             </div>
-            <div className="flex items-center gap-4">
-              <LanguageSwitcher />
-              <div className="text-right">
-                <p className="text-sm font-semibold text-gray-800">{userProfile?.fullName || currentUser?.email}</p>
-                <p className="text-xs text-gray-600">Agriculture Official</p>
-              </div>
-              <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition">
-                <LogOut className="w-4 h-4" />
-                {t("logout")}
+            <div>
+              <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-gray-800 whitespace-nowrap">
+                <span className="hidden sm:inline">Government Dashboard</span>
+                <span className="inline sm:hidden">Gov</span>
+              </h1>
+              <p className="text-xs text-gray-600 hidden md:block">
+                {userProfile?.department || "Agriculture"} • {userProfile?.region || "National"}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5 sm:gap-2 md:gap-4">
+            <LanguageSwitcher />
+            
+            <div className="relative">
+              <button
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                className="flex items-center gap-1 sm:gap-2 bg-blue-100 hover:bg-blue-200 px-2 sm:px-3 md:px-4 py-2 rounded-lg transition min-h-[44px]"
+              >
+                <User className="w-5 h-5 md:w-6 md:h-6 text-blue-700" />
+                <span className="text-blue-700 font-semibold text-xs sm:text-sm md:text-base hidden xs:inline">
+                  GOV
+                </span>
               </button>
+
+              {showProfileMenu && (
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl p-3 z-50">
+                  <p className="font-medium text-gray-800 mb-1 text-sm">
+                    {userProfile?.fullName || currentUser?.email}
+                  </p>
+                  <p className="text-xs text-gray-600 mb-3">Agriculture Official</p>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 w-full text-red-600 hover:bg-red-50 px-3 py-2 rounded-lg transition min-h-[44px]"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    {t("logout")}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
-      </div>
+      </nav>
 
-      {/* Tabs */}
-      <div className="bg-white border-b">
+      {/* Mobile Tab Menu Overlay */}
+      {showMobileMenu && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 lg:hidden" onClick={() => setShowMobileMenu(false)}>
+          <div className="w-64 bg-white h-full shadow-lg p-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <Building2 className="w-6 h-6 text-blue-600" />
+                Menu
+              </h2>
+              <button onClick={() => setShowMobileMenu(false)} className="min-h-[44px] min-w-[44px] flex items-center justify-center">
+                <X className="w-6 h-6 text-gray-600" />
+              </button>
+            </div>
+            <nav className="space-y-2">
+              {tabs.map(tab => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => { setActiveTab(tab.id); setShowMobileMenu(false); }}
+                    className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 min-h-[44px] transition ${
+                      activeTab === tab.id
+                        ? "bg-blue-100 text-blue-700 font-semibold"
+                        : "hover:bg-gray-100 text-gray-700"
+                    }`}
+                  >
+                    <Icon className="w-5 h-5" />
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+        </div>
+      )}
+
+      {/* Desktop Tabs */}
+      <div className="hidden lg:block bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex gap-4">
-            {[
-              { id: "overview", label: "Overview", icon: BarChart3 },
-              { id: "farmers", label: "All Farmers", icon: Users },
-              { id: "animals", label: "Livestock", icon: Activity },
-              { id: "requests", label: "Vet Requests", icon: FileText },
-              { id: "alerts", label: "Alerts Control", icon: Bell },
-              { id: "weather", label: "Weather", icon: Cloud }
-            ].map(tab => {
+          <div className="flex gap-4 overflow-x-auto">
+            {tabs.map(tab => {
               const Icon = tab.icon;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-3 border-b-2 transition ${
+                  className={`flex items-center gap-2 px-4 py-3 border-b-2 transition whitespace-nowrap ${
                     activeTab === tab.id
                       ? "border-blue-600 text-blue-600 font-semibold"
                       : "border-transparent text-gray-600 hover:text-gray-800"
@@ -259,12 +327,12 @@ export default function GovernmentDashboard() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 md:py-6 lg:py-8">
         {/* Overview Tab */}
         {activeTab === "overview" && (
           <div>
             {/* Statistics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-6 md:mb-8">
               <StatCard title="Total Farmers" value={stats.totalFarmers} icon={Users} color="green" />
               <StatCard title="Veterinarians" value={stats.totalVets} icon={Activity} color="blue" />
               <StatCard title="Total Livestock" value={stats.totalAnimals} icon={TrendingUp} color="purple" />
@@ -274,56 +342,56 @@ export default function GovernmentDashboard() {
             </div>
 
             {/* Weather & Recent Activity */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
               {/* Weather Card */}
               {weather && (
-                <div className="bg-white rounded-xl shadow-lg p-6">
+                <div className="bg-white rounded-xl shadow-lg p-4 md:p-6">
                   <div className="flex items-center gap-2 mb-4">
                     <Cloud className="w-5 h-5 text-blue-600" />
-                    <h3 className="text-xl font-bold text-gray-800">Current Weather</h3>
+                    <h3 className="text-base md:text-lg lg:text-xl font-bold text-gray-800">Current Weather</h3>
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-4xl font-bold text-gray-800">{weather.temperature}°C</p>
-                      <p className="text-gray-600 mt-1">{weather.description}</p>
-                      <p className="text-sm text-gray-500 mt-2">Humidity: {weather.humidity}%</p>
+                      <p className="text-3xl md:text-4xl font-bold text-gray-800">{weather.temperature}°C</p>
+                      <p className="text-sm md:text-base text-gray-600 mt-1">{weather.description}</p>
+                      <p className="text-xs md:text-sm text-gray-500 mt-2">Humidity: {weather.humidity}%</p>
                     </div>
-                    <div className="text-6xl">{weather.icon}</div>
+                    <div className="text-4xl md:text-6xl">{weather.icon}</div>
                   </div>
                 </div>
               )}
 
               {/* Quick Actions */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="text-xl font-bold text-gray-800 mb-4">Quick Actions</h3>
+              <div className="bg-white rounded-xl shadow-lg p-4 md:p-6">
+                <h3 className="text-base md:text-lg lg:text-xl font-bold text-gray-800 mb-4">Quick Actions</h3>
                 <div className="space-y-3">
                   <button
                     onClick={() => setShowAlertModal(true)}
-                    className="w-full flex items-center gap-3 p-3 border-2 border-blue-200 rounded-lg hover:bg-blue-50 transition"
+                    className="w-full flex items-center gap-3 p-3 border-2 border-blue-200 rounded-lg hover:bg-blue-50 transition min-h-[44px]"
                   >
-                    <Bell className="w-5 h-5 text-blue-600" />
-                    <span className="font-semibold text-gray-800">Create Government Alert</span>
+                    <Bell className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                    <span className="font-semibold text-gray-800 text-sm md:text-base">Create Government Alert</span>
                   </button>
                   <button
                     onClick={() => setActiveTab("farmers")}
-                    className="w-full flex items-center gap-3 p-3 border-2 border-green-200 rounded-lg hover:bg-green-50 transition"
+                    className="w-full flex items-center gap-3 p-3 border-2 border-green-200 rounded-lg hover:bg-green-50 transition min-h-[44px]"
                   >
-                    <Users className="w-5 h-5 text-green-600" />
-                    <span className="font-semibold text-gray-800">View All Farmers</span>
+                    <Users className="w-5 h-5 text-green-600 flex-shrink-0" />
+                    <span className="font-semibold text-gray-800 text-sm md:text-base">View All Farmers</span>
                   </button>
                   <button
                     onClick={() => setActiveTab("animals")}
-                    className="w-full flex items-center gap-3 p-3 border-2 border-purple-200 rounded-lg hover:bg-purple-50 transition"
+                    className="w-full flex items-center gap-3 p-3 border-2 border-purple-200 rounded-lg hover:bg-purple-50 transition min-h-[44px]"
                   >
-                    <Activity className="w-5 h-5 text-purple-600" />
-                    <span className="font-semibold text-gray-800">Livestock Overview</span>
+                    <Activity className="w-5 h-5 text-purple-600 flex-shrink-0" />
+                    <span className="font-semibold text-gray-800 text-sm md:text-base">Livestock Overview</span>
                   </button>
                 </div>
               </div>
             </div>
 
             {/* Recent Activity */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
               <ActivityCard title="Recent Alerts" icon={Bell} items={recentAlerts} type="alert" formatTime={formatRelativeTime} />
               <ActivityCard title="Recent Vet Requests" icon={FileText} items={recentRequests} type="request" formatTime={formatRelativeTime} />
             </div>
@@ -332,9 +400,25 @@ export default function GovernmentDashboard() {
 
         {/* Farmers Tab */}
         {activeTab === "farmers" && (
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">All Registered Farmers</h2>
-            <div className="overflow-x-auto">
+          <div className="bg-white rounded-xl shadow-lg p-4 md:p-6">
+            <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6">All Registered Farmers</h2>
+            
+            {/* Mobile Cards */}
+            <div className="md:hidden space-y-3">
+              {farmers.map(farmer => (
+                <div key={farmer.id} className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-bold text-gray-800">{farmer.fullName}</h3>
+                    <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded">Active</span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-1">{farmer.email}</p>
+                  <p className="text-xs text-gray-500">Joined {formatRelativeTime(farmer.createdAt)}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
@@ -363,23 +447,39 @@ export default function GovernmentDashboard() {
 
         {/* Animals Tab */}
         {activeTab === "animals" && (
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">National Livestock Overview</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-white rounded-xl shadow-lg p-4 md:p-6">
+            <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6">National Livestock Overview</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-4 md:mb-6">
               <div className="bg-blue-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-600">Total Animals</p>
-                <p className="text-3xl font-bold text-blue-600">{stats.totalAnimals}</p>
+                <p className="text-xs md:text-sm text-gray-600">Total Animals</p>
+                <p className="text-2xl md:text-3xl font-bold text-blue-600">{stats.totalAnimals}</p>
               </div>
               <div className="bg-green-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-600">Pigs</p>
-                <p className="text-3xl font-bold text-green-600">{allAnimals.filter(a => a.type === "pigs").reduce((sum, a) => sum + (a.quantity || 0), 0)}</p>
+                <p className="text-xs md:text-sm text-gray-600">Pigs</p>
+                <p className="text-2xl md:text-3xl font-bold text-green-600">{allAnimals.filter(a => a.type === "pigs").reduce((sum, a) => sum + (a.quantity || 0), 0)}</p>
               </div>
               <div className="bg-yellow-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-600">Chickens</p>
-                <p className="text-3xl font-bold text-yellow-600">{allAnimals.filter(a => a.type === "chickens").reduce((sum, a) => sum + (a.quantity || 0), 0)}</p>
+                <p className="text-xs md:text-sm text-gray-600">Chickens</p>
+                <p className="text-2xl md:text-3xl font-bold text-yellow-600">{allAnimals.filter(a => a.type === "chickens").reduce((sum, a) => sum + (a.quantity || 0), 0)}</p>
               </div>
             </div>
-            <div className="overflow-x-auto">
+
+            {/* Mobile Cards */}
+            <div className="md:hidden space-y-3">
+              {allAnimals.slice(0, 50).map(animal => (
+                <div key={animal.id} className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-bold text-gray-800 capitalize">{animal.type}</h3>
+                    <span className="text-sm font-semibold text-gray-800">{animal.quantity}</span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-1">{animal.category}</p>
+                  <p className="text-xs text-gray-500">{animal.date}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
@@ -534,10 +634,10 @@ export default function GovernmentDashboard() {
       {/* Create Alert Modal */}
       {showAlertModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-gray-800">Create Government Alert</h3>
-              <button onClick={() => setShowAlertModal(false)} className="text-gray-500 hover:text-gray-700">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-4 sm:p-6">
+            <div className="flex justify-between items-start mb-4">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-800 pr-2">Create Government Alert</h3>
+              <button onClick={() => setShowAlertModal(false)} className="text-gray-500 hover:text-gray-700 min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -548,7 +648,7 @@ export default function GovernmentDashboard() {
                 <select
                   value={newAlert.type}
                   onChange={(e) => setNewAlert({ ...newAlert, type: e.target.value })}
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
                 >
                   <option value="info">Information</option>
                   <option value="warning">Warning</option>
@@ -561,22 +661,22 @@ export default function GovernmentDashboard() {
                 <textarea
                   value={newAlert.message}
                   onChange={(e) => setNewAlert({ ...newAlert, message: e.target.value })}
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
                   rows="4"
                   placeholder="Enter alert message for all farmers..."
                 />
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={() => setShowAlertModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                  className="w-full sm:flex-1 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition min-h-[44px]"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleCreateAlert}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition"
+                  className="w-full sm:flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg flex items-center justify-center gap-2 transition min-h-[44px]"
                 >
                   <Send className="w-4 h-4" />
                   Send Alert
@@ -601,14 +701,14 @@ function StatCard({ title, value, icon: Icon, color }) {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
+    <div className="bg-white rounded-xl shadow-lg p-4 md:p-6">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-600 text-sm font-medium">{title}</p>
-          <p className="text-3xl font-bold text-gray-800 mt-2">{value}</p>
+          <p className="text-gray-600 text-xs md:text-sm font-medium">{title}</p>
+          <p className="text-2xl md:text-3xl font-bold text-gray-800 mt-1 md:mt-2">{value}</p>
         </div>
-        <div className={`p-3 rounded-full ${colors[color]}`}>
-          <Icon className="w-8 h-8" />
+        <div className={`p-2 md:p-3 rounded-full ${colors[color]}`}>
+          <Icon className="w-6 h-6 md:w-8 md:h-8" />
         </div>
       </div>
     </div>
@@ -617,14 +717,14 @@ function StatCard({ title, value, icon: Icon, color }) {
 
 function ActivityCard({ title, icon: Icon, items, type, formatTime }) {
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
+    <div className="bg-white rounded-xl shadow-lg p-4 md:p-6">
       <div className="flex items-center gap-2 mb-4">
         <Icon className="w-5 h-5 text-blue-600" />
-        <h3 className="text-xl font-bold text-gray-800">{title}</h3>
+        <h3 className="text-base md:text-lg lg:text-xl font-bold text-gray-800">{title}</h3>
       </div>
       <div className="space-y-3 max-h-96 overflow-y-auto">
         {items.length === 0 ? (
-          <p className="text-center text-gray-500 py-4">No items yet</p>
+          <p className="text-center text-gray-500 py-4 text-sm">No items yet</p>
         ) : (
           items.map(item => (
             <div key={item.id} className={type === "alert" ? 
@@ -635,8 +735,8 @@ function ActivityCard({ title, icon: Icon, items, type, formatTime }) {
             }>
               {type === "alert" ? (
                 <>
-                  <p className="text-sm font-medium text-gray-800">{item.message}</p>
-                  <div className="flex items-center gap-2 mt-1">
+                  <p className="text-sm font-medium text-gray-800 break-words">{item.message}</p>
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
                     <p className="text-xs text-gray-500">{formatTime(item.timestamp)}</p>
                     {item.createdByName && (
                       <>
@@ -648,12 +748,12 @@ function ActivityCard({ title, icon: Icon, items, type, formatTime }) {
                 </>
               ) : (
                 <>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-semibold text-gray-800">{item.animalType} - {item.category}</p>
-                      <p className="text-sm text-gray-600 mt-1">{item.message}</p>
+                  <div className="flex justify-between items-start gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-800 text-sm">{item.animalType} - {item.category}</p>
+                      <p className="text-sm text-gray-600 mt-1 break-words">{item.message}</p>
                     </div>
-                    <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                    <span className={`px-2 py-1 rounded text-xs font-semibold whitespace-nowrap flex-shrink-0 ${
                       item.status === "pending" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"
                     }`}>
                       {item.status}
